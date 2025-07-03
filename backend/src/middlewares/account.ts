@@ -2,8 +2,14 @@ import {prisma} from "../db";
 import express from "express";
 
 export async function validateStartVerificationRequest(req:express.Request, res:express.Response, next:express.NextFunction) {
-    const { email, handle } = req.body;
-    if (!handle || !email) {
+    const { handle } = req.body;
+    if(!req.isAuthenticated()){
+        res.status(400).json({ success: false, message:"Not logged in."});
+        return;
+    }
+    const user = req.user as any;
+    const email = user.email;
+    if (!handle) {
         res.status(400).json({ success: false, message: "Missing handle or email." });
         return;
     }

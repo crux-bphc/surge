@@ -19,9 +19,15 @@ export async function startVerificationController(req:express.Request,res:expres
 
 export async function checkVerificationController(req:express.Request,res:express.Response){
     try{
-        const {handle,email,contestId,index} = req.body;
-        if(!handle || !email || !contestId || !index){
-            res.status(400).json({success:false,message:'handle or email or contestId or index missing.'});
+        const {handle,contestId,index} = req.body;
+        if(!req.isAuthenticated()){
+            res.status(400).json({ success: false, message:"Not logged in."});
+            return;
+        }
+        const user = req.user as any;
+        const email = user.email;
+        if(!handle || !contestId || !index){
+            res.status(400).json({success:false,message:'handle or contestId or index missing.'});
             return;
         }
         const isVerified = await verifySubmission(handle,contestId,index);
