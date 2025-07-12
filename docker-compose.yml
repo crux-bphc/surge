@@ -49,8 +49,6 @@ services:
     volumes:
       - ./backend/src:/usr/local/app/backend/src
       - ./backend/tsconfig.json:/usr/local/app/backend/tsconfig.json
-    ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
     depends_on:
       - postgres
       - redis

@@ -6,10 +6,20 @@ import {
 } from "../controllers/account";
 import { validateStartVerificationRequest } from "../middlewares/account";
 import { requireAuth } from "../middlewares/auth";
-import { RatingChange, SolvedProblem, Submission, User } from "../types/codeforces";
+import {
+  RatingChange,
+} from "../types/codeforces";
+import { db } from "../drizzle/db";
+import {
+  contests,
+  userContests,
+  users,
+  submissions,
+  problems,
+} from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 const router = express.Router();
-const BASE_URL = "https://codeforces.com/api/"
 
 router.use(requireAuth);
 
@@ -20,142 +30,150 @@ router.post(
 );
 router.post("/check-verification", checkVerificationController);
 
-router.get("/:handle/stats", async (req: Request, res: Response) => {
-  const {handle} = req.params;
-
-  try {
-    const response = await fetch(BASE_URL + `user.info?handles=${handle}`)
-
-    if(!response.ok){
-      res.status(response.status).send({error: 'Failed to fetch from CodeForces API'});
-    }
-
-    const data = await response.json();
-
-    if(data.status !== 'OK' || !data.result || !data.result[0]){
-      res.status(404).send({error: 'CodeForces user not found!'});
-    }
-
-    const user : User = data.result[0];
-
-    res.send(user);
-  } catch(error) {
-    res.status(500).send({error: "Internal server error"});
-  }
-
-})
-
 router.get("/:handle/ratings", async (req: Request, res: Response) => {
-  const {handle} = req.params;
+  const { handle } = req.params;
 
   const from = parseInt(req.query.from as string) as number | undefined;
-  const to = parseInt(req.query.to as string) as number | undefined;  
+  const to = parseInt(req.query.to as string) as number | undefined;
 
   try {
-    const response = await fetch(BASE_URL + `user.rating?handle=${handle}`);
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.cfHandle, handle))
+      .then((users) => users[0]);
 
-    if(!response.ok){
-      res.status(response.status).send({error: 'Failed to fetch from CodeForces API'});
+    if (!user) {
+      res.status(404).json({ error: "User not found!" });
+      return;
     }
 
-    const data = await response.json();
+    const ratingData = await db
+      .select({
+        contestId: userContests.contestId,
+        contestName: contests.name,
+        rank: userContests.rank,
+        updateTime: userContests.updateTime,
+        oldRating: userContests.oldRating,
+        newRating: userContests.newRating,
+      })
+      .from(userContests)
+      .innerJoin(contests, eq(userContests.contestId, contests.externalId))
+      .where(eq(userContests.userId, user.id));
 
-    if(data.status !== 'OK' || !data.result){
-      res.status(404).send({error: "CodeForces user not found!"});
-    }
+    let ratingChanges: RatingChange[] = ratingData
+      .filter(
+        (data) =>
+          data.rank !== null &&
+          data.oldRating !== null &&
+          data.newRating !== null
+      )
+      .map((data) => ({
+        ...data,
+        ratingUpdateTimeSeconds: Math.floor(
+          new Date(data.updateTime!).getTime() / 1000
+        ),
+        handle,
+        rank: data.rank!,
+        oldRating: data.oldRating!,
+        newRating: data.newRating!,
+      }));
 
-    let ratingChanges : RatingChange[] = data.result;
-
-    ratingChanges = ratingChanges.filter(change => 
-      (from ? change.ratingUpdateTimeSeconds >= from : true) &&
-      (to ? change.ratingUpdateTimeSeconds <= to: true)
-    )
+    ratingChanges = ratingChanges.filter(
+      (change) =>
+        (from ? change.ratingUpdateTimeSeconds >= from : true) &&
+        (to ? change.ratingUpdateTimeSeconds <= to : true)
+    );
 
     res.send(ratingChanges);
-  } catch(error) {
-    res.status(500).send({error: "Internal server error"});
+  } catch (error) {
+    res.status(500).send({ error: "Internal server error" });
   }
-})
+});
 
 router.get("/:handle/submissions", async (req: Request, res: Response) => {
-  const {handle} = req.params;
-
-  const start = parseInt(req.query.from as string) as number | undefined;
-  const count = parseInt(req.query.count as string) as number | undefined;  
+  const { handle } = req.params;
 
   try {
-    const response = await fetch(BASE_URL + `user.status?handle=${handle}` 
-      + (start ? `&from=${start}` : "")
-      + (count ? `&count=${count}` : ""));
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.cfHandle, handle))
+      .then((rows) => rows[0]);
 
-    if(!response.ok){
-      res.status(response.status).send({error: 'Failed to fetch from CodeForces API'});
+    if (!user) {
+      res.status(404).json({ error: "User not found!" });
+      return;
     }
 
-    const data = await response.json();
+    const submissionsData = await db
+      .select({
+        submissionId: submissions.id,
+        verdict: submissions.verdict,
+        submittedAt: submissions.submittedAt,
+        language: submissions.programmingLanguage,
+        problemId: problems.id,
+        problemName: problems.name,
+        problemRating: problems.rating,
+        problemIndex: problems.index,
+        problemTags: problems.tags,
+      })
+      .from(submissions)
+      .innerJoin(problems, eq(submissions.problemId, problems.id))
+      .where(eq(submissions.userId, user.id));
 
-    if(data.status !== 'OK' || !data.result){
-      res.status(404).send({error: "CodeForces user not found!"});
-    }
-
-    const submissions : Submission[] = data.result;
-
-    res.send(submissions);
-  } catch(error) {
-    res.status(500).send({error: "Internal server error"});
+    res.send(
+      submissionsData.map((submission) => ({
+        ...submission,
+        creationTimeSeconds: Math.floor(
+          new Date(submission.submittedAt!).getTime() / 1000
+        ),
+      }))
+    );
+  } catch (error) {
+    res.status(500).send({ error: "Internal server error" });
   }
-})
+});
 
 router.get("/:handle/solved", async (req: Request, res: Response) => {
-  const {handle} = req.params;
-
-  const start = parseInt(req.query.from as string) as number | undefined;
-  const count = parseInt(req.query.count as string) as number | undefined;  
+  const { handle } = req.params;
 
   try {
-    const response = await fetch(BASE_URL + `user.status?handle=${handle}` 
-      + (start ? `&from=${start}` : "")
-      + (count ? `&count=${count}` : ""));
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.cfHandle, handle))
+      .then((rows) => rows[0]);
 
-    if(!response.ok){
-      res.status(response.status).send({error: 'Failed to fetch from CodeForces API'});
+    if (!user) {
+      res.status(404).json({ error: "User not found!" });
+      return;
     }
 
-    const data = await response.json();
+    const solvedProlems = await db
+      .selectDistinctOn([problems.id], {
+        name: problems.name,
+        rating: problems.rating ?? problems.points ?? null,
+        tags: problems.tags,
+        dateSolved: submissions.submittedAt,
+        contestId: problems.contestId,
+        index: problems.index,
+        verdict: submissions.verdict,
+      })
+      .from(submissions)
+      .orderBy(problems.id, submissions.submittedAt)
+      .innerJoin(problems, eq(submissions.problemId, problems.id))
+      .where(eq(submissions.verdict, "AC"));
 
-    if(data.status !== 'OK' || !data.result){
-      res.status(404).send({error: "CodeForces user not found!"});
-    }
-
-    const submissions : Submission[] = data.result;
-
-    const solvedMap = new Map<string, SolvedProblem>();
-
-    submissions
-    .filter(s => s.verdict === 'OK')
-    .forEach(submission => {
-      const problemKey = `${submission.problem.contestId}-${submission.problem.index}`;
-      
-      if (!solvedMap.has(problemKey) && submission.verdict) {
-        solvedMap.set(problemKey, {
-          name: submission.problem.name,
-          rating: submission.problem.rating,
-          tags: submission.problem.tags,
-          dateSolved: new Date(submission.creationTimeSeconds * 1000),
-          contestId: submission.problem.contestId,
-          index: submission.problem.index,
-          verdict: submission.verdict
-        });
-      }
-    });
-
-    res.send(Array.from(solvedMap.values()).sort((a, b) => 
-      b.dateSolved.getTime() - a.dateSolved.getTime()
-    ))
-
-  } catch(error) {
-    res.status(500).send({error: "Internal server error"});
+    res.send(
+      solvedProlems.map((problem) => ({
+        ...problem,
+        dateSolved: new Date(problem.dateSolved!),
+      }))
+    );
+  } catch (error) {
+    res.status(500).send({ error: "Internal server error " + error });
   }
-})
+});
 
 export default router;

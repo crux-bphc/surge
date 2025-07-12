@@ -1,11 +1,10 @@
 import {
   getRandomProblem,
   verifySubmission,
-  getUserInfo,
+  linkCfHandle,
 } from "../codeforces_api";
-import { prisma } from "../db";
 import express from "express";
-import { User } from "@prisma/client";
+import { users } from "../drizzle/schema";
 
 export async function startVerificationController(
   req: express.Request,
@@ -39,25 +38,16 @@ export async function checkVerificationController(
       return;
     }
 
-    const authenticatedUser = req.user as User;
+    const authenticatedUser = req.user as typeof users.$inferSelect;
 
     const isVerified = await verifySubmission(handle, contestId, index);
 
     if (isVerified) {
-      const userInfo = await getUserInfo(handle);
-      const updatedUser = await prisma.user.update({
-        where: {
-          id: authenticatedUser.id,
-        },
-        data: {
-          cfHandle: handle,
-          cfRating: userInfo.rating,
-        },
-      });
+      const verifiedUser = await linkCfHandle(handle, authenticatedUser.id);
       res.status(200).json({
         success: true,
         message: "Account verified.",
-        data: updatedUser,
+        data: verifiedUser,
       });
     } else {
       res.status(400).json({

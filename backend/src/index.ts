@@ -5,14 +5,15 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import authRoutes from "./routes/auth";
-import { prisma } from "./db";
-import { User } from "@prisma/client";
 import accountRoutes from "./routes/account";
 import leaderboardRoutes from "./routes/leaderboard";
 import profileRoutes from "./routes/profile";
 import contestRoutes from "./routes/contest";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
+import { client, db } from "./drizzle/db";
+import { users } from "./drizzle/schema";
+import { eq } from "drizzle-orm"
 
 dotenv.config();
 const app = express();
@@ -32,6 +33,13 @@ const redisClient = createClient({
 });
 
 redisClient.connect().catch(console.error);
+(async () => {
+  await client.connect()
+    .then(() => console.log("Connected to DB successfully"))
+    .catch(error => {
+      console.error("Error connecting to db: ", error);
+    });
+})();
 
 app.use(
   session({
@@ -62,20 +70,15 @@ passport.use(
         const email = profile.emails![0].value;
         const name = profile.displayName;
         const pfpUrl = profile.photos![0].value;
-        const user = await prisma.user.upsert({
-          where: {
-            email: email,
-          },
-          update: {
-            name: name,
-            pfpUrl: pfpUrl,
-          },
-          create: {
-            email: email,
-            name: name,
-            pfpUrl: pfpUrl,
-          },
-        });
+        const user = await db
+          .insert(users)
+          .values({ email, name, pfpUrl})
+          .onConflictDoUpdate({
+            target: users.email,
+            set: {name, pfpUrl},
+          })
+          .returning()
+          .then(rows => rows[0]);
         return done(null, user);
       } catch (error) {
         console.error("Error during Google authentication:", error);
@@ -86,13 +89,19 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
-  const prismaUser = user as User;
-  done(null, prismaUser.id);
+  const drizzleUser = user as typeof users.$inferSelect;
+  done(null, drizzleUser.id);
 });
 
 passport.deserializeUser(async (userId: string, done) => {
+  console.log(userId)
   try {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+      .then(rows => rows[0]);
     done(null, user);
   } catch (error) {
     console.error("Error deserializing user:", error);

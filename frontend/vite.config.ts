@@ -10,4 +10,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    host: true,
+    port: Number(process.env.FRONTEND_PORT) || 5173,
+    hmr: {
+      host: 'localhost', // or your host machine's IP (not 127.0.0.1)
+      port: Number(process.env.FRONTEND_PORT) || 5173,
+    },
+  }
 });

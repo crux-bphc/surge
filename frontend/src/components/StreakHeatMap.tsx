@@ -83,13 +83,13 @@ export default function StreakHeatmap({ handle }: { handle: string }) {
   useEffect(() => {
     axios
       .get(
-        `${import.meta.env.VITE_API_BASE_URL}/account/${handle}/submissions?count=5000`,
+        `${import.meta.env.VITE_API_BASE_URL}/account/${handle}/submissions`,
         { withCredentials: true }
       )
       .then((res) => {
         const map: Record<string, number> = {};
         (res.data as Submission[])
-          .filter((s) => s.verdict === "OK")
+          .filter((s) => s.verdict === "AC")
           .forEach((s) => {
             const d = dayjs(s.creationTimeSeconds * 1000).format("YYYY-MM-DD");
             map[d] = (map[d] || 0) + 1;

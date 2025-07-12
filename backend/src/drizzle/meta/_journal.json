@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1752114388293,
+      "tag": "0000_migrate_from_prisma",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752316992568,
+      "tag": "0001_store_cf_data",
+      "breakpoints": true
+    }
+  ]
+}

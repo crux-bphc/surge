@@ -1,6 +1,7 @@
-import { prisma } from "../db";
 import express from "express";
-import { User } from "@prisma/client";
+import { db } from "../drizzle/db";
+import {users} from "../drizzle/schema";
+import {eq} from "drizzle-orm";
 
 export async function validateStartVerificationRequest(
   req: express.Request,
@@ -14,7 +15,7 @@ export async function validateStartVerificationRequest(
     return;
   }
 
-  const authenticatedUser = req.user as User;
+  const authenticatedUser = req.user as typeof users.$inferSelect;
 
   if (authenticatedUser.cfHandle) {
     res
@@ -23,11 +24,12 @@ export async function validateStartVerificationRequest(
     return;
   }
 
-  const handleUser = await prisma.user.findUnique({
-    where: {
-      cfHandle: handle,
-    },
-  });
+  const handleUser = await db
+    .select()
+    .from(users)
+    .where(eq(users.cfHandle, handle))
+    .limit(1)
+    .then(rows => rows[0]);
 
   if (handleUser) {
     res
