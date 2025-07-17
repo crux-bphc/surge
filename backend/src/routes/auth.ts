@@ -7,7 +7,6 @@ const router = express.Router();
 
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:4173";
 
-console.log(CLIENT_URL);
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })

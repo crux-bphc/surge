@@ -38,7 +38,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     })
       .then((res) => (res.status === 401 ? null : res.json()))
       .then((data) => {
-        console.log(data?.user);
         setUser(data?.user || null);
         setLoading(false);
       })

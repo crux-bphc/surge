@@ -37,7 +37,7 @@ const fetchContests = async () => {
 
     contestsCache = data.objects as Contest[];
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 

@@ -103,7 +103,6 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (userId: string, done) => {
-  console.log(userId);
   try {
     const user = await db
       .select()
