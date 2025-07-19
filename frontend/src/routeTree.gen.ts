@@ -11,12 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as PotdRouteImport } from './routes/potd'
-import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResourceIndexRouteImport } from './routes/resource/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile/index'
+import { Route as LeaderboardIndexRouteImport } from './routes/leaderboard/index'
 import { Route as ResourceSlugRouteImport } from './routes/resource/$slug'
 import { Route as ProfileSlugRouteImport } from './routes/profile/$slug'
+import { Route as LeaderboardSlugRouteImport } from './routes/leaderboard/$slug'
 
 const StatsRoute = StatsRouteImport.update({
   id: '/stats',
@@ -26,11 +27,6 @@ const StatsRoute = StatsRouteImport.update({
 const PotdRoute = PotdRouteImport.update({
   id: '/potd',
   path: '/potd',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LeaderboardRoute = LeaderboardRouteImport.update({
-  id: '/leaderboard',
-  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -48,6 +44,11 @@ const ProfileIndexRoute = ProfileIndexRouteImport.update({
   path: '/profile/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LeaderboardIndexRoute = LeaderboardIndexRouteImport.update({
+  id: '/leaderboard/',
+  path: '/leaderboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResourceSlugRoute = ResourceSlugRouteImport.update({
   id: '/resource/$slug',
   path: '/resource/$slug',
@@ -58,35 +59,43 @@ const ProfileSlugRoute = ProfileSlugRouteImport.update({
   path: '/profile/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LeaderboardSlugRoute = LeaderboardSlugRouteImport.update({
+  id: '/leaderboard/$slug',
+  path: '/leaderboard/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/leaderboard': typeof LeaderboardRoute
   '/potd': typeof PotdRoute
   '/stats': typeof StatsRoute
+  '/leaderboard/$slug': typeof LeaderboardSlugRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/resource/$slug': typeof ResourceSlugRoute
+  '/leaderboard': typeof LeaderboardIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/resource': typeof ResourceIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/leaderboard': typeof LeaderboardRoute
   '/potd': typeof PotdRoute
   '/stats': typeof StatsRoute
+  '/leaderboard/$slug': typeof LeaderboardSlugRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/resource/$slug': typeof ResourceSlugRoute
+  '/leaderboard': typeof LeaderboardIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/resource': typeof ResourceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/leaderboard': typeof LeaderboardRoute
   '/potd': typeof PotdRoute
   '/stats': typeof StatsRoute
+  '/leaderboard/$slug': typeof LeaderboardSlugRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/resource/$slug': typeof ResourceSlugRoute
+  '/leaderboard/': typeof LeaderboardIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/resource/': typeof ResourceIndexRoute
 }
@@ -94,42 +103,46 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/leaderboard'
     | '/potd'
     | '/stats'
+    | '/leaderboard/$slug'
     | '/profile/$slug'
     | '/resource/$slug'
+    | '/leaderboard'
     | '/profile'
     | '/resource'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/leaderboard'
     | '/potd'
     | '/stats'
+    | '/leaderboard/$slug'
     | '/profile/$slug'
     | '/resource/$slug'
+    | '/leaderboard'
     | '/profile'
     | '/resource'
   id:
     | '__root__'
     | '/'
-    | '/leaderboard'
     | '/potd'
     | '/stats'
+    | '/leaderboard/$slug'
     | '/profile/$slug'
     | '/resource/$slug'
+    | '/leaderboard/'
     | '/profile/'
     | '/resource/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LeaderboardRoute: typeof LeaderboardRoute
   PotdRoute: typeof PotdRoute
   StatsRoute: typeof StatsRoute
+  LeaderboardSlugRoute: typeof LeaderboardSlugRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
   ResourceSlugRoute: typeof ResourceSlugRoute
+  LeaderboardIndexRoute: typeof LeaderboardIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   ResourceIndexRoute: typeof ResourceIndexRoute
 }
@@ -148,13 +161,6 @@ declare module '@tanstack/react-router' {
       path: '/potd'
       fullPath: '/potd'
       preLoaderRoute: typeof PotdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/leaderboard': {
-      id: '/leaderboard'
-      path: '/leaderboard'
-      fullPath: '/leaderboard'
-      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -178,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/leaderboard/': {
+      id: '/leaderboard/'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resource/$slug': {
       id: '/resource/$slug'
       path: '/resource/$slug'
@@ -192,16 +205,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/leaderboard/$slug': {
+      id: '/leaderboard/$slug'
+      path: '/leaderboard/$slug'
+      fullPath: '/leaderboard/$slug'
+      preLoaderRoute: typeof LeaderboardSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  LeaderboardRoute: LeaderboardRoute,
   PotdRoute: PotdRoute,
   StatsRoute: StatsRoute,
+  LeaderboardSlugRoute: LeaderboardSlugRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   ResourceSlugRoute: ResourceSlugRoute,
+  LeaderboardIndexRoute: LeaderboardIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   ResourceIndexRoute: ResourceIndexRoute,
 }

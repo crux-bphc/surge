@@ -80,7 +80,7 @@ export function RouteComponent() {
   }
 
   return (
-    <div className="p-4">
+    <div className="max-w-7xl m-auto">
       <div className="mb-8 border-b border-highlight-dark">
         <div className="flex items-center justify-between mb-6">
           <div>

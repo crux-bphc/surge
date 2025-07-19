@@ -3,76 +3,77 @@
 
 @plugin "@tailwindcss/typography";
 @utility prose {
-  code {
-    &::before,
-    &::after {
-      content: none;
-    }
-  }
+	code {
+		&::before,
+		&::after {
+			content: none;
+		}
+	}
 }
 
 @import "@fontsource/jetbrains-mono";
 
 @theme {
-  --font-mono:
-    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+	--font-mono:
+		"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+		"Liberation Mono", "Courier New", monospace;
 
-  --color-highlight-lighter: #919ac8;
-  --color-highlight-light: rgba(69, 75, 104, 1);
-  --color-highlight-dark: rgba(37, 41, 62, 1);
-  --color-dark-background: rgba(15, 17, 26, 1);
-  --color-accent-red: rgba(235, 87, 87, 1);
-  --color-accent-purple: rgba(145, 154, 200, 1);
-  --color-muted: rgba(141, 152, 170, 1);
-  --color-accent-yellow: rgba(255, 199, 39, 1);
-  --color-card-light: rgba(229, 231, 242, 1);
+	--color-highlight-lighter: #919ac8;
+	--color-highlight-light: rgba(69, 75, 104, 1);
+	--color-highlight-dark: rgba(37, 41, 62, 1);
+	--color-highlight-darker: rgba(23, 39, 75, 1);
+	--color-dark-background: rgba(15, 17, 26, 1);
+	--color-accent-red: rgba(235, 87, 87, 1);
+	--color-accent-purple: rgba(145, 154, 200, 1);
+	--color-muted: rgba(141, 152, 170, 1);
+	--color-accent-yellow: rgba(255, 199, 39, 1);
+	--color-card-light: rgba(229, 231, 242, 1);
 }
 
 @layer base {
-  body {
-    font-family: var(--font-mono);
-  }
+	body {
+		font-family: var(--font-mono);
+	}
 }
 
 .material-symbols-outlined {
-  font-variation-settings:
-    "FILL" 1,
-    "wght" 400,
-    "GRAD" 0,
-    "opsz" 48;
+	font-variation-settings:
+		"FILL" 1,
+		"wght" 400,
+		"GRAD" 0,
+		"opsz" 48;
 
-  font-size: 48px;
+	font-size: 48px;
 }
 
 .recharts-sector:focus,
 .recharts-surface:focus {
-  outline: none !important;
+	outline: none !important;
 }
 
 @layer utilities {
-  .striped div:nth-child(even) {
-    @apply bg-[#1B1E30];
-  }
+	.striped div:nth-child(even) {
+		@apply bg-[#1B1E30];
+	}
 }
 
 :root {
-  background-color: var(--color-dark-background);
+	background-color: var(--color-dark-background);
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
+	width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+	background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--color-highlight-dark);
-  border-radius: 6px;
+	background-color: var(--color-highlight-dark);
+	border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #6b7280; /* gray-500 */
+	background-color: #6b7280; /* gray-500 */
 }

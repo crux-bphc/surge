@@ -17,7 +17,7 @@ function RouteComponent() {
   if (loading) return <LoadingIndicator />;
 
   return (
-    <div className="p-4">
+    <div className="p-4 pt-0 m-auto">
       <div className="mb-8 border-b border-[#25293E]">
         <div className="flex items-center justify-between mb-6">
           <div>

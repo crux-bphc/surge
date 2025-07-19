@@ -102,7 +102,7 @@ const UpcomingContests: React.FC = () => {
                   href={c.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-6 text-sm font-semibold px-5 py-2 rounded-full bg-accent-yellow hover:bg-yellow-500 text-white text-center transition"
+                  className="mt-6 text-sm font-semibold px-5 py-2 rounded-full bg-accent-yellow hover:bg-yellow-500 text-highlight-darker text-center transition"
                 >
                   Go to Contest →
                 </a>

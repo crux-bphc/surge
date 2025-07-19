@@ -30,7 +30,7 @@ app.set("trust proxy", 1);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:4173",
+    origin: process.env.VITE_CLIENT_URL || "http://localhost:4173",
     credentials: true,
   })
 );

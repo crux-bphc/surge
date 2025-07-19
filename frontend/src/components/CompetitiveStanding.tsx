@@ -51,7 +51,7 @@ export default function CompetitiveStanding({ handle }: { handle: string }) {
         Competitive <span className="text-gray-400">Standing</span>
       </h2>
 
-      <div className="grid max-w-screen-lg grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
           title="Problems solved"
           value={totalSolved}
@@ -87,14 +87,14 @@ function Card({
   img: string;
 }) {
   return (
-    <div className="bg-card-light rounded-xl p-4 flex items-center justify-between shadow hover:scale-[1.01] transition-transform">
-      <div>
-        <div className="text-sm text-gray-400 mb-1 underline underline-offset-auto">
+    <div className="bg-card-light rounded-xl p-4 flex items-center justify-between shadow hover:scale-[1.01] transition-transform max-w-screen-sm">
+      <div className="w-[calc(100%-6rem)]">
+        <div className="text-sm text-gray-400 mb-1 underline underline-offset-auto font-bold">
           {title}
         </div>
-        <div className="text-3xl font-bold text-highlight-light">{value}</div>
+        <div className="text-3xl font-bold text-highlight-light truncate break-all">{value}</div>
       </div>
-      <img src={img} alt={title} className="h-24 w-auto" />
+      <img src={img} alt={title} className="h-24 w-24" />
     </div>
   );
 }
