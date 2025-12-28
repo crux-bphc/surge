@@ -1,4 +1,4 @@
-import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { Outlet, createRootRoute, useMatches } from "@tanstack/react-router";
 import { useAuth } from "../context/AuthContext";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import Login from "../pages/Login";
@@ -24,12 +24,23 @@ export default function RootComponent() {
     return <Login />;
   }
 
+  const matches = useMatches();
+  const isFullScreen = matches.some((match) => match.staticData.fullScreen);
+
   return (
     <div className="flex flex-col md:flex-row  min-h-screen">
-      <Navbar />
-      <main className="flex-grow overflow-hidden p-6 md:mt-0 md:ml-30 bg-dark-background text-white max-w-screen">
-        <Outlet />
-      </main>
+      {isFullScreen ? (
+        <main className="flex-grow overflow-hidden bg-dark-background text-white max-w-screen">
+          <Outlet />
+        </main>
+      ) : (
+        <>
+          <Navbar />
+          <main className="flex-grow overflow-hidden p-6 md:mt-0 md:ml-30 bg-dark-background text-white max-w-screen">
+            <Outlet />
+          </main>
+        </>
+      )}
       {import.meta.env.VITE_ENV === "development" && (
         <TanStackRouterDevtools position="bottom-right" />
       )}
