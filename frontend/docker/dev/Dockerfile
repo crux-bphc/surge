@@ -10,6 +10,4 @@ COPY ./frontend/vite.config.ts ./
 
 RUN npm install
 
-COPY ./frontend/src ./src
-
 CMD ["npm", "run", "dev"]
