@@ -76,13 +76,10 @@ services:
       dockerfile: ./frontend/docker/dev/Dockerfile
     env_file:
       - .env
+    user: "node"
     volumes:
-      - ./frontend/src:/usr/local/app/frontend/src
-      - ./frontend/public:/usr/local/app/frontend/public
-      - ./frontend/index.html:/usr/local/app/frontend/index.html
-      - ./frontend/tsconfig.app.json:/usr/local/app/frontend/tsconfig.app.json
-      - ./frontend/tsconfig.node.json:/usr/local/app/frontend/tsconfig.node.json
-      - ./frontend/tsconfig.json:/usr/local/app/frontend/tsconfig.json
+      - ./frontend:/usr/local/app/frontend
+      - /usr/local/app/frontend/node_modules
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     profiles:
