@@ -9,12 +9,12 @@ import RatingsSlide from "../components/Wrapped/RatingsSlide";
 import PotdSlide from "../components/Wrapped/PotdSlide";
 
 const fetchWrappedData = async (id: string) => {
-  axios
+  return axios
     .get(`${import.meta.env.VITE_API_BASE_URL}/wrapped/${id}`, {
       withCredentials: true,
     })
     .then((res) => {
-      return res.data;
+      return res.data.data;
     })
     .catch((err) => {
       console.error("Error fetching wrapped data:", err);
