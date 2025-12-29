@@ -8,210 +8,230 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as StatsRouteImport } from "./routes/stats";
-import { Route as PotdRouteImport } from "./routes/potd";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as ResourceIndexRouteImport } from "./routes/resource/index";
-import { Route as ProfileIndexRouteImport } from "./routes/profile/index";
-import { Route as LeaderboardIndexRouteImport } from "./routes/leaderboard/index";
-import { Route as ResourceSlugRouteImport } from "./routes/resource/$slug";
-import { Route as ProfileSlugRouteImport } from "./routes/profile/$slug";
-import { Route as LeaderboardSlugRouteImport } from "./routes/leaderboard/$slug";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as WrappedRouteImport } from './routes/wrapped'
+import { Route as StatsRouteImport } from './routes/stats'
+import { Route as PotdRouteImport } from './routes/potd'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as ResourceIndexRouteImport } from './routes/resource/index'
+import { Route as ProfileIndexRouteImport } from './routes/profile/index'
+import { Route as LeaderboardIndexRouteImport } from './routes/leaderboard/index'
+import { Route as ResourceSlugRouteImport } from './routes/resource/$slug'
+import { Route as ProfileSlugRouteImport } from './routes/profile/$slug'
+import { Route as LeaderboardSlugRouteImport } from './routes/leaderboard/$slug'
 
+const WrappedRoute = WrappedRouteImport.update({
+  id: '/wrapped',
+  path: '/wrapped',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatsRoute = StatsRouteImport.update({
-  id: "/stats",
-  path: "/stats",
+  id: '/stats',
+  path: '/stats',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const PotdRoute = PotdRouteImport.update({
-  id: "/potd",
-  path: "/potd",
+  id: '/potd',
+  path: '/potd',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ResourceIndexRoute = ResourceIndexRouteImport.update({
-  id: "/resource/",
-  path: "/resource/",
+  id: '/resource/',
+  path: '/resource/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ProfileIndexRoute = ProfileIndexRouteImport.update({
-  id: "/profile/",
-  path: "/profile/",
+  id: '/profile/',
+  path: '/profile/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LeaderboardIndexRoute = LeaderboardIndexRouteImport.update({
-  id: "/leaderboard/",
-  path: "/leaderboard/",
+  id: '/leaderboard/',
+  path: '/leaderboard/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ResourceSlugRoute = ResourceSlugRouteImport.update({
-  id: "/resource/$slug",
-  path: "/resource/$slug",
+  id: '/resource/$slug',
+  path: '/resource/$slug',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ProfileSlugRoute = ProfileSlugRouteImport.update({
-  id: "/profile/$slug",
-  path: "/profile/$slug",
+  id: '/profile/$slug',
+  path: '/profile/$slug',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LeaderboardSlugRoute = LeaderboardSlugRouteImport.update({
-  id: "/leaderboard/$slug",
-  path: "/leaderboard/$slug",
+  id: '/leaderboard/$slug',
+  path: '/leaderboard/$slug',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/potd": typeof PotdRoute;
-  "/stats": typeof StatsRoute;
-  "/leaderboard/$slug": typeof LeaderboardSlugRoute;
-  "/profile/$slug": typeof ProfileSlugRoute;
-  "/resource/$slug": typeof ResourceSlugRoute;
-  "/leaderboard": typeof LeaderboardIndexRoute;
-  "/profile": typeof ProfileIndexRoute;
-  "/resource": typeof ResourceIndexRoute;
+  '/': typeof IndexRoute
+  '/potd': typeof PotdRoute
+  '/stats': typeof StatsRoute
+  '/wrapped': typeof WrappedRoute
+  '/leaderboard/$slug': typeof LeaderboardSlugRoute
+  '/profile/$slug': typeof ProfileSlugRoute
+  '/resource/$slug': typeof ResourceSlugRoute
+  '/leaderboard': typeof LeaderboardIndexRoute
+  '/profile': typeof ProfileIndexRoute
+  '/resource': typeof ResourceIndexRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/potd": typeof PotdRoute;
-  "/stats": typeof StatsRoute;
-  "/leaderboard/$slug": typeof LeaderboardSlugRoute;
-  "/profile/$slug": typeof ProfileSlugRoute;
-  "/resource/$slug": typeof ResourceSlugRoute;
-  "/leaderboard": typeof LeaderboardIndexRoute;
-  "/profile": typeof ProfileIndexRoute;
-  "/resource": typeof ResourceIndexRoute;
+  '/': typeof IndexRoute
+  '/potd': typeof PotdRoute
+  '/stats': typeof StatsRoute
+  '/wrapped': typeof WrappedRoute
+  '/leaderboard/$slug': typeof LeaderboardSlugRoute
+  '/profile/$slug': typeof ProfileSlugRoute
+  '/resource/$slug': typeof ResourceSlugRoute
+  '/leaderboard': typeof LeaderboardIndexRoute
+  '/profile': typeof ProfileIndexRoute
+  '/resource': typeof ResourceIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/potd": typeof PotdRoute;
-  "/stats": typeof StatsRoute;
-  "/leaderboard/$slug": typeof LeaderboardSlugRoute;
-  "/profile/$slug": typeof ProfileSlugRoute;
-  "/resource/$slug": typeof ResourceSlugRoute;
-  "/leaderboard/": typeof LeaderboardIndexRoute;
-  "/profile/": typeof ProfileIndexRoute;
-  "/resource/": typeof ResourceIndexRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/potd': typeof PotdRoute
+  '/stats': typeof StatsRoute
+  '/wrapped': typeof WrappedRoute
+  '/leaderboard/$slug': typeof LeaderboardSlugRoute
+  '/profile/$slug': typeof ProfileSlugRoute
+  '/resource/$slug': typeof ResourceSlugRoute
+  '/leaderboard/': typeof LeaderboardIndexRoute
+  '/profile/': typeof ProfileIndexRoute
+  '/resource/': typeof ResourceIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/potd"
-    | "/stats"
-    | "/leaderboard/$slug"
-    | "/profile/$slug"
-    | "/resource/$slug"
-    | "/leaderboard"
-    | "/profile"
-    | "/resource";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/potd'
+    | '/stats'
+    | '/wrapped'
+    | '/leaderboard/$slug'
+    | '/profile/$slug'
+    | '/resource/$slug'
+    | '/leaderboard'
+    | '/profile'
+    | '/resource'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/potd"
-    | "/stats"
-    | "/leaderboard/$slug"
-    | "/profile/$slug"
-    | "/resource/$slug"
-    | "/leaderboard"
-    | "/profile"
-    | "/resource";
+    | '/'
+    | '/potd'
+    | '/stats'
+    | '/wrapped'
+    | '/leaderboard/$slug'
+    | '/profile/$slug'
+    | '/resource/$slug'
+    | '/leaderboard'
+    | '/profile'
+    | '/resource'
   id:
-    | "__root__"
-    | "/"
-    | "/potd"
-    | "/stats"
-    | "/leaderboard/$slug"
-    | "/profile/$slug"
-    | "/resource/$slug"
-    | "/leaderboard/"
-    | "/profile/"
-    | "/resource/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/potd'
+    | '/stats'
+    | '/wrapped'
+    | '/leaderboard/$slug'
+    | '/profile/$slug'
+    | '/resource/$slug'
+    | '/leaderboard/'
+    | '/profile/'
+    | '/resource/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  PotdRoute: typeof PotdRoute;
-  StatsRoute: typeof StatsRoute;
-  LeaderboardSlugRoute: typeof LeaderboardSlugRoute;
-  ProfileSlugRoute: typeof ProfileSlugRoute;
-  ResourceSlugRoute: typeof ResourceSlugRoute;
-  LeaderboardIndexRoute: typeof LeaderboardIndexRoute;
-  ProfileIndexRoute: typeof ProfileIndexRoute;
-  ResourceIndexRoute: typeof ResourceIndexRoute;
+  IndexRoute: typeof IndexRoute
+  PotdRoute: typeof PotdRoute
+  StatsRoute: typeof StatsRoute
+  WrappedRoute: typeof WrappedRoute
+  LeaderboardSlugRoute: typeof LeaderboardSlugRoute
+  ProfileSlugRoute: typeof ProfileSlugRoute
+  ResourceSlugRoute: typeof ResourceSlugRoute
+  LeaderboardIndexRoute: typeof LeaderboardIndexRoute
+  ProfileIndexRoute: typeof ProfileIndexRoute
+  ResourceIndexRoute: typeof ResourceIndexRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/stats": {
-      id: "/stats";
-      path: "/stats";
-      fullPath: "/stats";
-      preLoaderRoute: typeof StatsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/potd": {
-      id: "/potd";
-      path: "/potd";
-      fullPath: "/potd";
-      preLoaderRoute: typeof PotdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/resource/": {
-      id: "/resource/";
-      path: "/resource";
-      fullPath: "/resource";
-      preLoaderRoute: typeof ResourceIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/profile/": {
-      id: "/profile/";
-      path: "/profile";
-      fullPath: "/profile";
-      preLoaderRoute: typeof ProfileIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/leaderboard/": {
-      id: "/leaderboard/";
-      path: "/leaderboard";
-      fullPath: "/leaderboard";
-      preLoaderRoute: typeof LeaderboardIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/resource/$slug": {
-      id: "/resource/$slug";
-      path: "/resource/$slug";
-      fullPath: "/resource/$slug";
-      preLoaderRoute: typeof ResourceSlugRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/profile/$slug": {
-      id: "/profile/$slug";
-      path: "/profile/$slug";
-      fullPath: "/profile/$slug";
-      preLoaderRoute: typeof ProfileSlugRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/leaderboard/$slug": {
-      id: "/leaderboard/$slug";
-      path: "/leaderboard/$slug";
-      fullPath: "/leaderboard/$slug";
-      preLoaderRoute: typeof LeaderboardSlugRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/wrapped': {
+      id: '/wrapped'
+      path: '/wrapped'
+      fullPath: '/wrapped'
+      preLoaderRoute: typeof WrappedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stats': {
+      id: '/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/potd': {
+      id: '/potd'
+      path: '/potd'
+      fullPath: '/potd'
+      preLoaderRoute: typeof PotdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resource/': {
+      id: '/resource/'
+      path: '/resource'
+      fullPath: '/resource'
+      preLoaderRoute: typeof ResourceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/': {
+      id: '/profile/'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard/': {
+      id: '/leaderboard/'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resource/$slug': {
+      id: '/resource/$slug'
+      path: '/resource/$slug'
+      fullPath: '/resource/$slug'
+      preLoaderRoute: typeof ResourceSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/$slug': {
+      id: '/profile/$slug'
+      path: '/profile/$slug'
+      fullPath: '/profile/$slug'
+      preLoaderRoute: typeof ProfileSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard/$slug': {
+      id: '/leaderboard/$slug'
+      path: '/leaderboard/$slug'
+      fullPath: '/leaderboard/$slug'
+      preLoaderRoute: typeof LeaderboardSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -219,13 +239,14 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PotdRoute: PotdRoute,
   StatsRoute: StatsRoute,
+  WrappedRoute: WrappedRoute,
   LeaderboardSlugRoute: LeaderboardSlugRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   ResourceSlugRoute: ResourceSlugRoute,
   LeaderboardIndexRoute: LeaderboardIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   ResourceIndexRoute: ResourceIndexRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
