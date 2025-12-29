@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx ts-node-dev src/index.ts",
+    "generate:wrapped":"ts-node src/scripts/generateWrappedStats.ts",
     "build": "tsc",
     "prestart": "npx drizzle-kit migrate",
     "start": "node dist/index.js",
