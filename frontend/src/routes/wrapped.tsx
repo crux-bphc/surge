@@ -4,6 +4,9 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import LoadingIndicator from "../components/LoadingIndicator";
+import ContestsSlide from "../components/Wrapped/ContestsSlide";
+import RatingsSlide from "../components/Wrapped/RatingsSlide";
+import PotdSlide from "../components/Wrapped/PotdSlide";
 
 const fetchWrappedData = async (id: string) => {
   axios
@@ -57,31 +60,20 @@ function RouteComponent() {
   const SLIDES = [
     {
       id: "1",
-      component: <Component1 />,
-      duration: 500,
+      component: <RatingsSlide highestRating={1000}/>,
+      duration: 12000,
     },
     {
       id: "2",
-      component: <Component2 />,
+      component: <ContestsSlide userContests={14} avgCampusContests={6}/>,
+      duration: 12000,
     },
     {
       id: "3",
-      component: <Component3 />,
-      duration: 7000,
+      component: <PotdSlide potdSolveCount={2}/>,
+      duration: 12000,
     },
   ];
 
   return <StoryViewer slides={SLIDES} />;
-}
-
-function Component1() {
-  return <>component1</>;
-}
-
-function Component2() {
-  return <>component2</>;
-}
-
-function Component3() {
-  return <>component3</>;
 }
