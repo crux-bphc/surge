@@ -13,7 +13,11 @@ jobs:
       - name: Pull latest code and deploy with Docker
         run: |
           cd /home/ubuntu/clones/surge-staging
-          git reset --hard HEAD
-          GIT_SSH_COMMAND="ssh -i /home/ubuntu/.ssh/gh-actions -o IdentitiesOnly=yes" git pull
+          export GIT_SSH_COMMAND="ssh -i /home/ubuntu/.ssh/gh-actions -o IdentitiesOnly=yes"
+          
+          git fetch origin
+          git checkout ${{ github.ref_name }}
+          git reset --hard origin/${{ github.ref_name }}
+
           docker compose --profile prod down
           docker compose --profile prod up --build -d
