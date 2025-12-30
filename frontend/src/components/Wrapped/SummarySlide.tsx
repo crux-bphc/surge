@@ -10,7 +10,7 @@ interface SummarySlideProps {
       finalRating: number;
       campusRank: number;
       batchRank: number;
-      monthlySolves: Array<{ month: string; solvedCount: number }>;
+      monthlySolves: Array<{ month: string; label: string; solvedCount: number }>;
     };
   };
 }
@@ -61,7 +61,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
   const mostActiveMonth = data.monthlySolves.reduce(
     (maxMonth, currentMonth) =>
       currentMonth.solvedCount > maxMonth.solvedCount ? currentMonth : maxMonth,
-    { month: "N/A", solvedCount: -1 }
+    { month: "N/A", label: "N/A", solvedCount: -1 }
   );
 
   return (
@@ -139,7 +139,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
           >
             <div className="flex justify-between items-center">
               <span className="text-sm" style={{ color: COLORS.subtext0 }}>Most Active Month</span>
-              <span className="text-lg font-bold" style={{ color: COLORS.yellow }}>{mostActiveMonth.month} ({mostActiveMonth.solvedCount} solves)</span>
+              <span className="text-lg font-bold" style={{ color: COLORS.yellow }}>{mostActiveMonth.label} ({mostActiveMonth.solvedCount} solves)</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm" style={{ color: COLORS.subtext0 }}>Top Tags</span>
