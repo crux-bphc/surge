@@ -19,7 +19,7 @@ async function generateStats(user: (typeof users)['$inferSelect']) {
 
     const submissionCount = userSubmissions.length;
     if (submissionCount === 0) {
-        console.log('No submissions for ${user.name}, skipped');
+        console.log(`No submissions for ${user.name}, skipped`);
         return null;
     }
 
