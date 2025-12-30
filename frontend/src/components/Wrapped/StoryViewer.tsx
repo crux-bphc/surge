@@ -144,7 +144,7 @@ export default function StoryViewer({ slides }: StoryViewerProps) {
         </motion.div>
         <motion.div
           key={currentIndex}
-          className="w-full h-dvh md:h-[calc(100dvh-3rem)] bg-white/20 md:rounded-lg"
+          className="w-full h-dvh md:h-[calc(100dvh-3rem)] bg-white/20 md:rounded-lg overflow-hidden md:outline-2 md:outline-[#1C4D8D]/20 md:shadow-lg md:shadow-[#1C4D8D]/20"
         >
           {slides[currentIndex].component}
         </motion.div>
