@@ -137,13 +137,13 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
           <div className="p-4 rounded-md space-y-2 text-left"
             style={{ backgroundColor: COLORS.crust }}
           >
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col justify-between items-start">
               <span className="text-sm" style={{ color: COLORS.subtext0 }}>Most Active Month</span>
-              <span className="text-lg font-bold" style={{ color: COLORS.yellow }}>{mostActiveMonth.label} ({mostActiveMonth.solvedCount} solves)</span>
+              <span className="text-lg font-bold" style={{ color: COLORS.yellow }}>{mostActiveMonth.month} ({mostActiveMonth.solvedCount} solves)</span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col justify-between items-start">
               <span className="text-sm" style={{ color: COLORS.subtext0 }}>Top Tags</span>
-              <span className="text-lg font-bold text-right" style={{ color: COLORS.yellow }}>{data.mostSolvedTags.slice(0, 3).join(", ")}</span>
+              <span className="text-lg font-bold" style={{ color: COLORS.yellow }}>{data.mostSolvedTags.slice(0, 3).join(", ")}</span>
             </div>
           </div>
         </motion.div>
