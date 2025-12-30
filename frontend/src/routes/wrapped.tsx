@@ -10,19 +10,6 @@ import PotdSlide from "../components/Wrapped/PotdSlide";
 import CampusLeaderboardSlide from "../components/Wrapped/CampusLeaderboardSlide";
 
 const fetchWrappedData = async (id: string) => {
-<<<<<<< HEAD
-  return axios
-    .get(`${import.meta.env.VITE_API_BASE_URL}/wrapped/${id}`, {
-      withCredentials: true,
-    })
-    .then((res) => {
-      return res.data.data;
-    })
-    .catch((err) => {
-      console.error("Error fetching wrapped data:", err);
-      throw err;
-    });
-=======
   try {
     const res = await axios.get(
       `${import.meta.env.VITE_API_BASE_URL}/wrapped/${id}`,
@@ -35,7 +22,6 @@ const fetchWrappedData = async (id: string) => {
         console.error("Error fetching wrapped data:", err);
     throw err;
   }
->>>>>>> c85bb7a (feat: leaderboard slide + updated wrapped.tsx to use proper data)
 };
 
 export const Route = createFileRoute("/wrapped")({
