@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { motion } from "motion/react";
+import html2canvas from "html2canvas";
 
 interface SummarySlideProps {
   wrappedData: {
@@ -57,6 +59,7 @@ const Background = () => (
 
 const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
   const data = wrappedData.data;
+  const slideRef = useRef<HTMLDivElement>(null);
 
   const mostActiveMonth = data.monthlySolves.reduce(
     (maxMonth, currentMonth) =>
@@ -64,20 +67,85 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
     { month: "N/A", label: "N/A", solvedCount: -1 }
   );
 
+  const handleShare = async () => {
+    if (!slideRef.current) return;
+
+    try {
+      const canvas = await html2canvas(slideRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+      });
+      const image = canvas.toDataURL("image/png");
+
+      if (navigator.share) {
+        const blob = await (await fetch(image)).blob();
+        const file = new File([blob], "surge-wrapped.png", { type: "image/png" });
+        await navigator.share({
+          files: [file],
+          title: "My 2025 Surge Wrapped",
+          text: `My 2025 Surge Wrapped: ${data.solvedCount} problems solved, rating ${data.finalRating}.`,
+        });
+      } else {
+        const link = document.createElement("a");
+        link.href = image;
+        link.download = "surge-wrapped.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        alert("Your Surge Wrapped image has been downloaded!");
+      }
+    } catch (error) {
+      console.error("Error sharing or generating image:", error);
+      alert("Failed to share your Surge Wrapped. Please try again.");
+    }
+  };
+
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-full overflow-hidden" ref={slideRef}>
       <Background />
 
       <div className="relative z-10 h-full flex flex-col items-center justify-center px-6 text-center py-4" style={{ color: COLORS.text }}>
-        <motion.h1
-          className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg"
-          style={{ color: COLORS.yellow }}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          Your 2025 Wrapped
-        </motion.h1>
+        <div className="flex justify-center items-center gap-2">
+          <motion.h1
+            className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg"
+            style={{ color: COLORS.yellow }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            Your 2025 Wrapped
+          </motion.h1>
+          <motion.button
+            onClick={handleShare}
+            className="mb-4 p-2 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: COLORS.blue, color: COLORS.text }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.0, duration: 0.5, ease: "easeOut" }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-share-2"
+            >
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+              <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+            </svg>
+          </motion.button>
+        </div>
 
         <motion.div
           className="w-full max-w-md rounded-lg p-4 shadow-2xl flex flex-col gap-3"
