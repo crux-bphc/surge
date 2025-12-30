@@ -8,6 +8,7 @@ import ContestsSlide from "../components/Wrapped/ContestsSlide";
 import RatingsSlide from "../components/Wrapped/RatingsSlide";
 import PotdSlide from "../components/Wrapped/PotdSlide";
 import CampusLeaderboardSlide from "../components/Wrapped/CampusLeaderboardSlide";
+import SummarySlide from "../components/Wrapped/SummarySlide";
 
 const fetchWrappedData = async (id: string) => {
   try {
@@ -89,6 +90,11 @@ function RouteComponent() {
     {
       id: "4",
       component: <CampusLeaderboardSlide currentUser={user} />,
+      duration: 12000,
+    },
+    {
+      id: "5",
+      component: <SummarySlide wrappedData={wrappedData} />,
       duration: 12000,
     },
   ];
