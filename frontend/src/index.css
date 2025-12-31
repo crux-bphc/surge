@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "material-symbols";
 
+@layer base {
+  img {
+    @apply inline-block;
+  }
+}
+
 @plugin "@tailwindcss/typography";
 @utility prose {
   code {

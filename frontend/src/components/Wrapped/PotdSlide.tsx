@@ -57,7 +57,7 @@ const AnimatedCount = ({ potdSolveCount }: { potdSolveCount: number }) => {
   );
 };
 
-const PotdSlide = ({ potdSolveCount = 214 }) => {
+const PotdSlide = ({ potdSolveCount = 0 }) => {
   const [view, setView] = useState<"intro" | "stats">("intro");
 
   const subText =

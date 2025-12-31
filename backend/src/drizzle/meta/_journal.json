@@ -15,6 +15,13 @@
       "when": 1766856014549,
       "tag": "0001_create_wrapped_25_table",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767216591616,
+      "tag": "0002_add_wrapped_25_highest_rating_column",
+      "breakpoints": true
     }
   ]
 }

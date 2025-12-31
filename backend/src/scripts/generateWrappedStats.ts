@@ -19,7 +19,7 @@ async function generateStats(user: (typeof users)['$inferSelect']) {
 
     const submissionCount = userSubmissions.length;
     if (submissionCount === 0) {
-        console.log('No submissions for ${user.name}, skipped');
+        console.log(`No submissions for ${user.name}, skipped`);
         return null;
     }
 
@@ -91,8 +91,16 @@ async function generateStats(user: (typeof users)['$inferSelect']) {
     });
 
     const contestCount = userContestsData.length;
-    const initialRating = userContestsData[0]?.oldRating ?? user.cfRating;
-    const finalRating = userContestsData[userContestsData.length - 1]?.newRating ?? user.cfRating;
+    const baseRating = user.cfRating ?? 0;
+    const initialRating = userContestsData[0]?.oldRating ?? baseRating;
+    const finalRating = userContestsData[userContestsData.length - 1]?.newRating ?? baseRating;
+
+    let highestRating = initialRating; 
+    if (userContestsData.length > 0) {
+        const allRatingsInPeriod = userContestsData.map(contest => contest.newRating ?? 0);
+        highestRating = Math.max(...allRatingsInPeriod, initialRating);
+    }
+    highestRating = Math.max(highestRating, user.cfRating ?? 0);
 
     const userPotdSolves = await db.query.potdSolves.findMany({
         where: and(
@@ -114,6 +122,7 @@ async function generateStats(user: (typeof users)['$inferSelect']) {
         contestCount,
         initialRating,
         finalRating,
+        highestRating,
         potdSolves: potdSolveCount,
         campusRank: 0,
         batchRank: 0
@@ -184,8 +193,9 @@ async function calculateRanks() {
     console.log("Ranks calculated");
 }
 
-async function main() {
-    await client.connect();
+
+export async function generateAllWrappedStats() {
+    console.log("Generating wrapped stats for all users");
     const allUsers = await db.query.users.findMany();
 
     const allStats = [];
@@ -210,6 +220,7 @@ async function main() {
                 contestCount: stats.contestCount,
                 initialRating: stats.initialRating,
                 finalRating: stats.finalRating,
+                highestRating: stats.highestRating,
                 potdSolves: stats.potdSolves
             }).where(eq(wrapped25.userId, stats.userId));
         }
@@ -218,12 +229,20 @@ async function main() {
     await calculateRanks();
 
     console.log("Wrapped stats generation complete!");
+}
+
+async function main() {
+    await client.connect();
+    await generateAllWrappedStats();
     await client.end();
     process.exit(0);
 }
 
-main().catch(async e => {
-    console.error(e);
-    await client.end();
-    process.exit(1);
-});
+if (require.main === module) {
+    main().catch(async e => {
+        console.error(e);
+        await client.end();
+        process.exit(1);
+    });
+}
+
