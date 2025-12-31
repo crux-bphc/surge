@@ -1,4 +1,7 @@
+import { useRef } from "react";
 import { motion } from "motion/react";
+import html2canvas from "html2canvas";
+import { Share2 } from "lucide-react";
 
 interface SummarySlideProps {
   wrappedData: {
@@ -57,6 +60,7 @@ const Background = () => (
 
 const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
   const data = wrappedData.data;
+  const slideRef = useRef<HTMLDivElement>(null);
 
   const mostActiveMonth = data.monthlySolves.reduce(
     (maxMonth, currentMonth) =>
@@ -64,89 +68,138 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
     { month: "N/A", label: "N/A", solvedCount: -1 }
   );
 
+  const handleShare = async () => {
+    if (!slideRef.current) return;
+
+    try {
+      const canvas = await html2canvas(slideRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: COLORS.base,
+      });
+      const image = canvas.toDataURL("image/png");
+
+      if (navigator.share) {
+        const blob = await (await fetch(image)).blob();
+        const file = new File([blob], "surge-wrapped.png", { type: "image/png" });
+        await navigator.share({
+          files: [file],
+          title: "My 2025 Surge Wrapped",
+          text: `My 2025 Surge Wrapped: ${data.solvedCount} problems solved, rating ${data.finalRating}.`,
+        });
+      } else {
+        const link = document.createElement("a");
+        link.href = image;
+        link.download = "surge-wrapped.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        alert("Your Surge Wrapped image has been downloaded!");
+      }
+    } catch (error) {
+      console.error("Error sharing or generating image:", error);
+      alert("Failed to share your Surge Wrapped. Please try again.");
+    }
+  };
+
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-full overflow-hidden flex flex-col">
       <Background />
-
-      <div className="relative z-10 h-full flex flex-col items-center justify-center px-6 text-center py-4" style={{ color: COLORS.text }}>
-        <motion.h1
-          className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg"
-          style={{ color: COLORS.yellow }}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          Your 2025 Wrapped
-        </motion.h1>
-
-        <motion.div
-          className="w-full max-w-md rounded-lg p-4 shadow-2xl flex flex-col gap-3"
-          style={{ backgroundColor: COLORS.mantle }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-        >
-          <div className="grid grid-cols-2 gap-4 text-left">
-            <motion.div 
-              className="p-4 rounded-md border transition-all"
-              style={{ backgroundColor: COLORS.crust, borderColor: COLORS.blue }}
-              whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
+      <div className="flex-grow relative z-10 mt-4" ref={slideRef}>
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center py-4" style={{ color: COLORS.text }}>
+          <div className="flex justify-center items-center gap-2">
+            <motion.h1
+              className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg"
+              style={{ color: COLORS.yellow }}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <p className="text-sm" style={{ color: COLORS.subtext0 }}>Total Solved</p>
-              <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{data.solvedCount}</p>
-            </motion.div>
-            <motion.div 
-              className="p-4 rounded-md border transition-all"
-              style={{ backgroundColor: COLORS.crust, borderColor: COLORS.blue }}
-              whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
-            >
-              <p className="text-sm" style={{ color: COLORS.subtext0 }}>Final Rating</p>
-              <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.green }}>{data.finalRating}</p>
-            </motion.div>
-            <motion.div 
-              className="p-4 rounded-md border transition-all"
-              style={{ backgroundColor: COLORS.crust, borderColor: COLORS.blue }}
-              whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
-            >
-              <p className="text-sm" style={{ color: COLORS.subtext0 }}>Longest Streak</p>
-              <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{data.longestStreak} days</p>
-            </motion.div>
-            <motion.div 
-              className="p-4 rounded-md border transition-all"
-              style={{ backgroundColor: COLORS.crust, borderColor: COLORS.blue }}
-              whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
-            >
-              <p className="text-sm" style={{ color: COLORS.subtext0 }}>Accuracy</p>
-              <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{(data.accuracy * 100).toFixed(2)}%</p>
-            </motion.div>
+              Your 2025 Wrapped
+            </motion.h1>
           </div>
 
-          <div className="flex justify-around items-center p-4 rounded-md shadow-inner"
-            style={{ backgroundColor: COLORS.crust, border: `2px solid ${COLORS.mauve}` }}
+          <motion.div
+            className="w-full max-w-md rounded-lg p-4 shadow-2xl flex flex-col gap-3"
+            style={{ backgroundColor: COLORS.mantle }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
           >
-            <div>
-              <p className="text-sm" style={{ color: COLORS.subtext0 }}>Campus Rank</p>
-              <p className="text-3xl font-bold" style={{ color: COLORS.mauve }}>{data.campusRank}</p>
+            {/* ... rest of the content ... */}
+            <div className="grid grid-cols-2 gap-4 text-left">
+              <motion.div
+                className="p-4 rounded-md border transition-all"
+                style={{ backgroundColor: COLORS.crust, borderColor: COLORS.blue }}
+                whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
+              >
+                <p className="text-sm" style={{ color: COLORS.subtext0 }}>Total Solved</p>
+                <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{data.solvedCount}</p>
+              </motion.div>
+              <motion.div
+                className="p-4 rounded-md border transition-all"
+                style={{ backgroundColor: COLORS.crust, borderColor: COLORS.blue }}
+                whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
+              >
+                <p className="text-sm" style={{ color: COLORS.subtext0 }}>Final Rating</p>
+                <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.green }}>{data.finalRating}</p>
+              </motion.div>
+              <motion.div
+                className="p-4 rounded-md border transition-all"
+                style={{ backgroundColor: COLORS.crust, borderColor: COLORS.blue }}
+                whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
+              >
+                <p className="text-sm" style={{ color: COLORS.subtext0 }}>Longest Streak</p>
+                <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{data.longestStreak} days</p>
+              </motion.div>
+              <motion.div
+                className="p-4 rounded-md border transition-all"
+                style={{ backgroundColor: COLORS.crust, borderColor: COLORS.blue }}
+                whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
+              >
+                <p className="text-sm" style={{ color: COLORS.subtext0 }}>Accuracy</p>
+                <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{(data.accuracy * 100).toFixed(2)}%</p>
+              </motion.div>
             </div>
-            <div>
-              <p className="text-sm" style={{ color: COLORS.subtext0 }}>Batch Rank</p>
-              <p className="text-3xl font-bold" style={{ color: COLORS.mauve }}>{data.batchRank}</p>
-            </div>
-          </div>
 
-          <div className="p-4 rounded-md space-y-2 text-left"
-            style={{ backgroundColor: COLORS.crust }}
-          >
-            <div className="flex flex-col justify-between items-start">
-              <span className="text-sm" style={{ color: COLORS.subtext0 }}>Most Active Month</span>
-              <span className="text-lg font-bold" style={{ color: COLORS.yellow }}>{mostActiveMonth.month} ({mostActiveMonth.solvedCount} solves)</span>
+            <div className="flex justify-around items-center p-4 rounded-md shadow-inner"
+              style={{ backgroundColor: COLORS.crust, border: `2px solid ${COLORS.mauve}` }}
+            >
+              <div>
+                <p className="text-sm" style={{ color: COLORS.subtext0 }}>Campus Rank</p>
+                <p className="text-3xl font-bold" style={{ color: COLORS.mauve }}>{data.campusRank}</p>
+              </div>
+              <div>
+                <p className="text-sm" style={{ color: COLORS.subtext0 }}>Batch Rank</p>
+                <p className="text-3xl font-bold" style={{ color: COLORS.mauve }}>{data.batchRank}</p>
+              </div>
             </div>
-            <div className="flex flex-col justify-between items-start">
-              <span className="text-sm" style={{ color: COLORS.subtext0 }}>Top Tags</span>
-              <span className="text-lg font-bold" style={{ color: COLORS.yellow }}>{data.mostSolvedTags.slice(0, 3).join(", ")}</span>
+
+            <div className="p-4 rounded-md space-y-2 text-left"
+              style={{ backgroundColor: COLORS.crust }}
+            >
+              <div className="flex flex-col justify-between items-start">
+                <span className="text-sm" style={{ color: COLORS.subtext0 }}>Most Active Month</span>
+                <span className="text-lg font-bold" style={{ color: COLORS.yellow }}>{mostActiveMonth.month} ({mostActiveMonth.solvedCount} solves)</span>
+              </div>
+              <div className="flex flex-col justify-between items-start">
+                <span className="text-sm" style={{ color: COLORS.subtext0 }}>Top Tags</span>
+                <span className="text-lg font-bold" style={{ color: COLORS.yellow }}>{data.mostSolvedTags.slice(0, 3).join(", ")}</span>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
+      </div>
+      <div className="flex-shrink-0 flex justify-center mb-12 relative z-20" data-html2canvas-ignore="true">
+        <motion.button
+          onClick={handleShare}
+          className="py-3 px-6 rounded-lg flex items-center justify-center gap-2 font-bold text-lg border"
+          style={{ backgroundColor: COLORS.crust, color: COLORS.text, borderColor: COLORS.blue }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          Share{" "}<Share2 />
+        </motion.button>
       </div>
     </div>
   );
