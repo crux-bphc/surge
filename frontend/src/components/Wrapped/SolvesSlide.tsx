@@ -91,10 +91,10 @@ const SolvesSlide = ({ userSolves = 12, totalCampusSolves = 540 }) => {
                             key="intro"
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.6, ease: "easeInOut" }}
-                            className="space-y-4"
+                            className="space-y-12"
                         >
                             <div
-                                className="text-2xl sm:text-3xl md:text-[3.2rem] font-extrabold leading-tight tracking-tight whitespace-norwrap"
+                                className="text-[3.2rem] font-extrabold leading-tight tracking-tight whitespace-norwrap"
                                 style={{ color: COLORS.yellow }}
                             >
                                 BPHC solved{" "}
@@ -106,22 +106,22 @@ const SolvesSlide = ({ userSolves = 12, totalCampusSolves = 540 }) => {
                                 >
                                     {animatedTotalCount}
                                 </motion.span>
-                            </div>
-                            <div
-                                className="mt-1 text-base sm:text-lg md:text-xl font-medium tracking-wide"
-                                style={{ color: "rgba(255,255,255,0.65)" }}
-                            >
-                                problems in 2025
+                                <div
+                                    className="mt-1 text-xl font-medium tracking-wide"
+                                    style={{ color: "rgba(255,255,255,0.65)" }}
+                                >
+                                    problems in 2025
+                                </div>
                             </div>
 
                             <motion.h1
-                                className="mt-6 text-2xl sm:text-2xl md:text-3.0xl font-bold tracking-tight"
+                                className="text-2xl font-bold tracking-tight"
                                 style={{ color: "rgba(255,255,255,0.9)" }}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{
                                     delay: 3.2,
-                                    duration: 1.4,
+                                    duration: .6,
                                     ease: "easeIn",
                                 }}
                             >
@@ -136,7 +136,7 @@ const SolvesSlide = ({ userSolves = 12, totalCampusSolves = 540 }) => {
                             initial={{ opacity: 0, y: 35 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut" }}
-                            className="flex flex-col items-center"
+                            className="flex flex-col items-center space-y-12"
                         >
                             <p
                                 className="uppercase tracking-widest mb-2 text-sm"
@@ -146,19 +146,19 @@ const SolvesSlide = ({ userSolves = 12, totalCampusSolves = 540 }) => {
                             </p>
 
                             <div
-                                className="text-8xl md:text-[9rem] font-black leading-none"
+                                className="text-[9rem] font-black leading-none"
                                 style={{ color: COLORS.yellow }}
                             >
                                 <motion.span>{animatedCount}</motion.span>
                             </div>
                             <motion.p
-                                className="text-xl md:text-2xl font-bold leading-snug tracking-wide"
+                                className="text-2xl font-bold leading-snug tracking-wide"
                                 style={{ color: COLORS.muted }}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{
                                     delay: 1.2,
-                                    duration: 1.4,
+                                    duration: 0.6,
                                     ease: "easeIn",
                                 }}
                             >
