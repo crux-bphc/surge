@@ -184,8 +184,9 @@ async function calculateRanks() {
     console.log("Ranks calculated");
 }
 
-async function main() {
-    await client.connect();
+
+export async function generateAllWrappedStats() {
+    console.log("Generating wrapped stats for all users");
     const allUsers = await db.query.users.findMany();
 
     const allStats = [];
@@ -218,12 +219,20 @@ async function main() {
     await calculateRanks();
 
     console.log("Wrapped stats generation complete!");
+}
+
+async function main() {
+    await client.connect();
+    await generateAllWrappedStats();
     await client.end();
     process.exit(0);
 }
 
-main().catch(async e => {
-    console.error(e);
-    await client.end();
-    process.exit(1);
-});
+if (require.main === module) {
+    main().catch(async e => {
+        console.error(e);
+        await client.end();
+        process.exit(1);
+    });
+}
+

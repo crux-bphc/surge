@@ -2,6 +2,7 @@ import { db } from "../drizzle/db";
 import { eq } from "drizzle-orm";
 import { wrapped25, users } from "../drizzle/schema";
 import type { Request, Response } from "express";
+import { generateAllWrappedStats } from "../scripts/generateWrappedStats";
 
 type User = typeof users.$inferSelect;
 
@@ -30,3 +31,14 @@ export const getWrappedStats = async (req: Request, res: Response): Promise<void
         res.status(500).json({ success: false, message: "Internal server error." });
     }
 };
+
+export const triggerWrappedStatsGeneration = async (req: Request, res: Response): Promise<void> => {
+    try {
+        await generateAllWrappedStats();
+        res.status(200).json({ success: true, message: "Wrapped stats generation triggered successfully." });
+    } catch (error) {
+        console.error("Error triggering wrapped stats generation:", error);
+        res.status(500).json({ success: false, message: "Internal server error." });
+    }
+};
+
