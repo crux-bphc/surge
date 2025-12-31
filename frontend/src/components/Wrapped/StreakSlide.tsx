@@ -75,7 +75,7 @@ const StreakSlide = ({ userStreak = 12, highestStreak = 25 }) => {
     else subtext = "You prefer touching grass";
 
     useEffect(() => {
-        const t = setTimeout(() => setView("stats"), 6600); // intro
+        const t = setTimeout(() => setView("stats"), 5600); // intro
         return () => clearTimeout(t);
     }, []);
 
@@ -88,56 +88,48 @@ const StreakSlide = ({ userStreak = 12, highestStreak = 25 }) => {
                         <motion.div
                             key="intro"
                             exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 1.6, ease: "easeInOut" }}
-                            className="space-y-4"
+                            transition={{ duration: 0.6, ease: "easeInOut" }}
+                            className="space-y-12"
                         >
                             <div
-                                className="text-2xl sm:text-3xl md:text-[3.2rem] font-extrabold leading-tight tracking-tight"
-                                style={{ color: COLORS.yellow }}
+                                className="text-[2.5rem] font-extrabold leading-tight tracking-tight whitespace-norwrap"
+                                style={{ color: COLORS.red }}
                             >
-                                <motion.h1
-                                    className="mt-6 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight"
-                                    style={{ color: "rgba(255,255,255,0.9)" }}
-                                    initial={{ opacity: 0, y: 20 }}
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{
-                                        delay: 0.2,
-                                        duration: 0.4,
-                                        ease: "easeIn",
-                                    }}
+                                    transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
                                 >
-                                    Highest <span className="text-red-500">Surge</span> Streak :{" "}
-                                    <motion.span
-                                        className="text-white"
-                                        initial={{ opacity: 0, y: 12 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
-                                    >
-                                        {animatedTotalCount}
-                                    </motion.span>
-                                    {" days"}{" "}
-                                </motion.h1>
+                                    2025's Highest Streak:{" "}
+                                </motion.span>
+                                <motion.span
+                                    className=" text-white"
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.8, duration: 1.0, ease: "easeOut" }}
+                                >
+                                    {animatedTotalCount}
+                                </motion.span>{" "}
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 1.2, duration: 1.6, ease: "easeOut" }}
+                                >
+                                    days{" "}
+                                </motion.span>
                             </div>
                             <div
-                                className="mt-1 text-base sm:text-lg md:text-xl font-medium tracking-wide"
+                                className="mt-1 text-base sm:text-lg md:text-xl font-medium tracking-wide py-8"
                                 style={{ color: "rgba(255,255,255,0.65)" }}
                             >
-                                They cooked.
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 1.8, duration: 2.6, ease: "easeOut" }}
+                                >
+                                    Let's compare it with yours.
+                                </motion.span>
                             </div>
-
-                            <motion.h1
-                                className="mt-6 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight"
-                                style={{ color: "rgba(255,255,255,0.9)" }}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{
-                                    delay: 3.2,
-                                    duration: 1.4,
-                                    ease: "easeIn",
-                                }}
-                            >
-                                What about you.{" "}
-                            </motion.h1>
                         </motion.div>
                     )}
 
@@ -157,7 +149,7 @@ const StreakSlide = ({ userStreak = 12, highestStreak = 25 }) => {
                             </p>
 
                             <div
-                                className="text-8xl md:text-[9rem] font-black leading-none"
+                                className="text-7xl md:text-[6rem] font-black leading-none"
                                 style={{ color: COLORS.yellow }}
                             >
                                 <motion.span>{animatedCount}</motion.span> days

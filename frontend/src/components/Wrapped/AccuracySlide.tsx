@@ -40,7 +40,7 @@ const Background = () => (
         className="absolute inset-0 z-0"
         animate={{ backgroundPosition: ["0% 0%", "200% 200%"] }}
         transition={{
-            duration: 180,
+            duration: 80,
             repeat: Infinity,
             ease: "linear",
         }}
@@ -59,9 +59,6 @@ const Background = () => (
 const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
     const [view, setView] = useState<"intro" | "stats">("intro");
 
-    // const diff = userSolves - avgCampusSolves;
-    // const isAbove = diff >= 0;
-    // const absDiff = Math.abs(diff);
     const animatedCampusAccuracy = useAnimatedNumber(
         view === "intro" ? averageCampusAccuracy : 10,
         600
@@ -71,6 +68,14 @@ const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
         600
     );
 
+    let subtext = "";
+    if (userAccuracy >= 60)
+        subtext = "You rank in the top 10 in terms of accuracy";
+    else if (userAccuracy >= 50)
+        subtext = "Your accuracy is better than majority of users.";
+    else if (userAccuracy === 0)
+        subtext = "Held your ground. Consistency is key.";
+    else subtext = "Majority of users have an accuracy less than 50%";
     useEffect(() => {
         const t = setTimeout(() => setView("stats"), 6600);
         return () => clearTimeout(t);
@@ -89,7 +94,7 @@ const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
                             className="space-y-4"
                         >
                             <div
-                                className="text-3xl sm:text-4xl md:text-[5.2rem] font-extrabold leading-tight tracking-tight"
+                                className="text-[4.2rem] font-extrabold leading-tight tracking-tight whitespace-norwrap"
                                 style={{ color: COLORS.yellow }}
                             >
                                 <motion.span
@@ -100,13 +105,27 @@ const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
                                 >
                                     {animatedCampusAccuracy}
                                 </motion.span>
-                                %
+
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+                                >
+                                    %
+                                </motion.span>
                             </div>
                             <div
                                 className="mt-1 text-base sm:text-lg md:text-xl font-medium tracking-wide"
                                 style={{ color: "rgba(255,255,255,0.65)" }}
                             >
-                                This is how accurate people were on AVERAGE{" "}
+                                {" "}
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.9, duration: 0.6, ease: "easeOut" }}
+                                >
+                                    This is how accurate people were on AVERAGE{" "}
+                                </motion.span>
                             </div>
 
                             <motion.h1
@@ -137,21 +156,39 @@ const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
                                 className="text-8xl md:text-[9rem] font-black leading-none"
                                 style={{ color: COLORS.yellow }}
                             >
-                                <motion.span>{animatedUserAccuracy}</motion.span>%
+                                <motion.span
+                                    className="text-white"
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+                                >
+                                    {animatedCampusAccuracy}
+                                </motion.span>
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+                                >
+                                    %{" "}
+                                </motion.span>
                             </div>
                             <p
-                                className="text-xl md:text-2xl font-bold leading-snug tracking-wide"
+                                className="text-[1.5rem] md:text-1xl font-bold leading-snug tracking-wide py-4"
                                 style={{ color: COLORS.muted }}
                             >
-                                You were mostly{" "}
                                 <span
                                     style={{
                                         color: userAccuracy > 50 ? COLORS.purple : COLORS.red,
                                     }}
                                 >
-                                    {userAccuracy > 50 ? "right." : "wrong."}
-                                </span>{" "}
-                                It's okay - better days will come.
+                                    <motion.span
+                                        initial={{ opacity: 0, y: 12 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 1.4, duration: 0.6, ease: "easeOut" }}
+                                    >
+                                        {subtext}{" "}
+                                    </motion.span>
+                                </span>
                             </p>
                         </motion.div>
                     )}

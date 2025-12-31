@@ -40,7 +40,7 @@ const Background = () => (
         className="absolute inset-0 z-0"
         animate={{ backgroundPosition: ["0% 0%", "200% 200%"] }}
         transition={{
-            duration: 180,
+            duration: 80,
             repeat: Infinity,
             ease: "linear",
         }}
@@ -97,7 +97,13 @@ const SolvesSlide = ({ userSolves = 12, totalCampusSolves = 540 }) => {
                                 className="text-[3.2rem] font-extrabold leading-tight tracking-tight whitespace-norwrap"
                                 style={{ color: COLORS.yellow }}
                             >
-                                BPHC solved{" "}
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+                                >
+                                    BPHC solved{" "}
+                                </motion.span>
                                 <motion.span
                                     className="block text-white"
                                     initial={{ opacity: 0, y: 12 }}
@@ -110,7 +116,14 @@ const SolvesSlide = ({ userSolves = 12, totalCampusSolves = 540 }) => {
                                     className="mt-1 text-xl font-medium tracking-wide"
                                     style={{ color: "rgba(255,255,255,0.65)" }}
                                 >
-                                    problems in 2025
+                                    {" "}
+                                    <motion.span
+                                        initial={{ opacity: 0, y: 12 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+                                    >
+                                        problems in 2025{" "}
+                                    </motion.span>
                                 </div>
                             </div>
 
@@ -121,7 +134,7 @@ const SolvesSlide = ({ userSolves = 12, totalCampusSolves = 540 }) => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{
                                     delay: 3.2,
-                                    duration: .6,
+                                    duration: 0.6,
                                     ease: "easeIn",
                                 }}
                             >

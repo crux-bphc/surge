@@ -122,7 +122,7 @@ const RatingsSlide = ({ initialRating = 1200, highestRating = 1000 }) => {
                             </div>
                             <div className="overflow-hidden mb-8">
                                 <motion.h1
-                                    className="text-5xl md:text-7xl font-black uppercase tracking-tighter"
+                                    className="text-7xl md:text-7xl font-black uppercase tracking-tighter"
                                     style={{ color: COLORS.brightRed }}
                                     initial={{ y: "100%" }}
                                     animate={{ y: 0 }}
@@ -132,7 +132,7 @@ const RatingsSlide = ({ initialRating = 1200, highestRating = 1000 }) => {
                                         ease: [0.33, 1, 0.68, 1],
                                     }}
                                 >
-                                    Rating 🥶
+                                    Rating
                                 </motion.h1>
                             </div>
 
@@ -143,7 +143,7 @@ const RatingsSlide = ({ initialRating = 1200, highestRating = 1000 }) => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 1.2, duration: 0.5 }}
                             >
-                                (Buckle up)
+                                (Buckle up 🥶)
                             </motion.p>
                         </motion.div>
                     )}

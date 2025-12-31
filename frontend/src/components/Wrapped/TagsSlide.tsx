@@ -27,7 +27,7 @@ const Background = () => (
         className="absolute inset-0 z-0"
         animate={{ backgroundPosition: ["0% 0%", "200% 200%"] }}
         transition={{
-            duration: 180,
+            duration: 80,
             repeat: Infinity,
             ease: "linear",
         }}
@@ -102,7 +102,7 @@ const TagsSlide = ({ highestSolvedTag, userTopTags }: TagsSlideProps) => {
     const [view, setView] = useState<"intro" | "stats">("intro");
 
     useEffect(() => {
-        const t = setTimeout(() => setView("stats"), 5600);
+        const t = setTimeout(() => setView("stats"), 5000);
         return () => clearTimeout(t);
     }, []);
 
@@ -120,25 +120,38 @@ const TagsSlide = ({ highestSolvedTag, userTopTags }: TagsSlideProps) => {
                             className="space-y-4"
                         >
                             <div
-                                className="text-3xl sm:text-4xl md:text-[2.5rem] font-extrabold tracking-tight"
+                                className="text-[2.2rem] sm:text-4xl md:text-[3.0rem] font-extrabold tracking-tight"
                                 style={{ color: COLORS.yellow }}
                             >
-                                <ShuffleText text={highestSolvedTag} duration={1000} />
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+                                >
+                                    {" "}
+                                    <ShuffleText text={highestSolvedTag} duration={2200} />
+                                </motion.span>{" "}
                             </div>
 
                             <div
                                 className="mt-1 text-base sm:text-lg md:text-xl font-medium tracking-wide"
                                 style={{ color: "rgba(255,255,255,0.65)" }}
                             >
-                                was the most solved tag on campus.
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 1.0, duration: 0.6, ease: "easeOut" }}
+                                >
+                                    was the most solved tag on campus.{" "}
+                                </motion.span>{" "}
                             </div>
 
                             <motion.h1
-                                className="mt-6 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight"
+                                className="mt-6 text-3xl md:text-[2.0rem] font-bold tracking-tight"
                                 style={{ color: "rgba(255,255,255,0.9)" }}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 1.2, duration: 1.4 }}
+                                transition={{ delay: 2.6, duration: 1.4 }}
                             >
                                 Your 5 most solved tags?
                             </motion.h1>
@@ -154,11 +167,16 @@ const TagsSlide = ({ highestSolvedTag, userTopTags }: TagsSlideProps) => {
                             className="flex flex-col items-center gap-y-12"
                         >
                             <div
-                                className="flex flex-col items-center gap-y-8
-        text-2xl sm:text-3xl md:text-4xl font-bold
-        border border-white
-        rounded-lg
-        px-4 py-6 "
+                                className=" mt-10
+    flex flex-col gap-4
+    max-w-xl md:max-w-2xl
+    mx-auto
+    px-4 sm:px-6
+    py-6
+    rounded-2xl
+    bg-white/5
+    backdrop-blur-sm
+    border border-white/10"
                             >
                                 {userTopTags.map((tag, i) => (
                                     <motion.div
@@ -169,7 +187,7 @@ const TagsSlide = ({ highestSolvedTag, userTopTags }: TagsSlideProps) => {
                                             delay: i * 0.1,
                                             duration: 0.4,
                                         }}
-                                        className="text-2xl sm:text-3xl md:text-4xl font-bold"
+                                        className="text-3xl sm:text-3xl md:text-4xl font-bold"
                                         style={{ color: TAG_COLORS[i] }}
                                     >
                                         •<ShuffleText text={tag} duration={1300} />
