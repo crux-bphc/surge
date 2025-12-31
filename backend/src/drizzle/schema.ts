@@ -166,6 +166,7 @@ export const wrapped25 = pgTable("wrapped_25", {
   contestCount: integer("contest_count").notNull().default(0),
   initialRating: integer("initial_rating"),
   finalRating: integer("final_rating"),
+  highestRating: integer("highest_rating"),
   potdSolves: integer("potd_solves"),
   campusRank: integer("campus_rank").notNull(),
   batchRank: integer("batch_rank").notNull(),

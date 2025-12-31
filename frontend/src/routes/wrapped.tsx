@@ -87,7 +87,6 @@ function RouteComponent() {
             ),
             duration: 12000,
         },
-
         {
             id: "2",
             component: (
@@ -97,7 +96,6 @@ function RouteComponent() {
             ),
             duration: 12000,
         },
-
         {
             id: "3",
             component: (
@@ -120,7 +118,7 @@ function RouteComponent() {
         },
         {
             id: "5",
-            component: <RatingsSlide highestRating={wrappedData.data.finalRating} />,
+            component: <RatingsSlide initialRating={wrappedData.data.initialRating} highestRating={wrappedData.data.highestRating} />,
             duration: 12000,
         },
         {
