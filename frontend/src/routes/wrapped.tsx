@@ -93,7 +93,6 @@ function RouteComponent() {
             component: (
                 <AccuracySlide
                     userAccuracy={wrappedData.data.accuracy}
-                    averageCampusAccuracy={64.5}
                 />
             ),
             duration: 12000,
