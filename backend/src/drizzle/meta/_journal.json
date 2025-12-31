@@ -15,6 +15,13 @@
       "when": 1766856014549,
       "tag": "0001_create_wrapped_25_table",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767172817547,
+      "tag": "0002_powerful_sugar_man",
+      "breakpoints": true
     }
   ]
 }

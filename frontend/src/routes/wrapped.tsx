@@ -74,7 +74,7 @@ function RouteComponent() {
   const SLIDES = [
     {
       id: "1",
-      component: <RatingsSlide highestRating={wrappedData.data.finalRating} />,
+      component: <RatingsSlide initialRating={wrappedData.data.initialRating} highestRating={wrappedData.data.highestRating} />,
       duration: 12000,
     },
     {

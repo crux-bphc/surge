@@ -91,8 +91,16 @@ async function generateStats(user: (typeof users)['$inferSelect']) {
     });
 
     const contestCount = userContestsData.length;
-    const initialRating = userContestsData[0]?.oldRating ?? user.cfRating;
-    const finalRating = userContestsData[userContestsData.length - 1]?.newRating ?? user.cfRating;
+    const baseRating = user.cfRating ?? 0;
+    const initialRating = userContestsData[0]?.oldRating ?? baseRating;
+    const finalRating = userContestsData[userContestsData.length - 1]?.newRating ?? baseRating;
+
+    let highestRating = initialRating; 
+    if (userContestsData.length > 0) {
+        const allRatingsInPeriod = userContestsData.map(contest => contest.newRating ?? 0);
+        highestRating = Math.max(...allRatingsInPeriod, initialRating);
+    }
+    highestRating = Math.max(highestRating, user.cfRating ?? 0);
 
     const userPotdSolves = await db.query.potdSolves.findMany({
         where: and(
@@ -114,6 +122,7 @@ async function generateStats(user: (typeof users)['$inferSelect']) {
         contestCount,
         initialRating,
         finalRating,
+        highestRating,
         potdSolves: potdSolveCount,
         campusRank: 0,
         batchRank: 0
@@ -211,6 +220,7 @@ export async function generateAllWrappedStats() {
                 contestCount: stats.contestCount,
                 initialRating: stats.initialRating,
                 finalRating: stats.finalRating,
+                highestRating: stats.highestRating,
                 potdSolves: stats.potdSolves
             }).where(eq(wrapped25.userId, stats.userId));
         }

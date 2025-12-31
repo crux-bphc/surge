@@ -60,7 +60,7 @@ const Background = () => (
   />
 );
 
-const ContestsSlide = ({ userContests = 12, avgCampusContests = 5 }) => {
+const ContestsSlide = ({ userContests = 0, avgCampusContests = 6 }) => {
   const [view, setView] = useState<"intro" | "stats">("intro");
 
   const diff = userContests - avgCampusContests;

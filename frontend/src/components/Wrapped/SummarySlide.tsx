@@ -13,6 +13,8 @@ interface SummarySlideProps {
       finalRating: number;
       campusRank: number;
       batchRank: number;
+      initialRating: number;
+      highestRating: number;
       monthlySolves: Array<{ month: string; label: string; solvedCount: number }>;
     };
   };
