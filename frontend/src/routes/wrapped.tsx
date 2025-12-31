@@ -7,97 +7,149 @@ import LoadingIndicator from "../components/LoadingIndicator";
 import ContestsSlide from "../components/Wrapped/ContestsSlide";
 import RatingsSlide from "../components/Wrapped/RatingsSlide";
 import PotdSlide from "../components/Wrapped/PotdSlide";
+import SolvesSlide from "../components/Wrapped/SolvesSlide";
+import AccuracySlide from "../components/Wrapped/AccuracySlide";
+import TagsSlide from "../components/Wrapped/TagsSlide";
+import StreakSlide from "../components/Wrapped/StreakSlide";
 import CampusLeaderboardSlide from "../components/Wrapped/CampusLeaderboardSlide";
 import SummarySlide from "../components/Wrapped/SummarySlide";
 
 const fetchWrappedData = async (id: string) => {
-  try {
-    const res = await axios.get(
-      `${import.meta.env.VITE_API_BASE_URL}/wrapped/${id}`,
-      {
-        withCredentials: true,
-      }
-    );
-    return res.data;
-  } catch (err) {
+    try {
+        const res = await axios.get(
+            `${import.meta.env.VITE_API_BASE_URL}/wrapped/${id}`,
+            {
+                withCredentials: true,
+            }
+        );
+        return res.data;
+    } catch (err) {
         console.error("Error fetching wrapped data:", err);
-    throw err;
-  }
+        throw err;
+    }
 };
 
 export const Route = createFileRoute("/wrapped")({
-  component: RouteComponent,
-  staticData: { fullScreen: true },
+    component: RouteComponent,
+    staticData: { fullScreen: true },
 });
 
 function RouteComponent() {
-  const [wrappedData, setWrappedData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [wrappedData, setWrappedData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { user, loading } = useAuth();
+    const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (loading) return;
+    useEffect(() => {
+        if (loading) return;
 
-    if (!user || !user.cfHandle) {
-      setIsLoading(false);
-      return;
+        if (!user || !user.cfHandle) {
+            setIsLoading(false);
+            return;
+        }
+
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                const data = await fetchWrappedData(user.id);
+                setWrappedData(data);
+            } catch (error) {
+                console.error("Error fetching wrapped data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [user, loading]);
+
+    if (isLoading) {
+        return <LoadingIndicator />;
     }
 
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const data = await fetchWrappedData(user.id);
-        setWrappedData(data);
-      } catch (error) {
-        console.error("Error fetching wrapped data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (!user || !wrappedData || !wrappedData.data) {
+        return (
+            <div className="flex items-center justify-center h-full text-white">
+                Could not load wrapped data for the user. Please ensure you are logged
+                in and have stats generated.
+            </div>
+        );
+    }
 
-    fetchData();
-  }, [user, loading]);
+    const SLIDES = [
+        {
+            id: "1",
+            component: (
+                <SolvesSlide
+                    userSolves={wrappedData.data.solvedCount}
+                    totalCampusSolves={540}
+                />
+            ),
+            duration: 12000,
+        },
 
-  if (isLoading) {
-    return <LoadingIndicator />;
-  }
-  
-  if (!user || !wrappedData || !wrappedData.data) {
-    return (
-      <div className="flex items-center justify-center h-full text-white">
-        Could not load wrapped data for the user. Please ensure you are logged in and have stats generated.
-      </div>
-    );
-  }
+        {
+            id: "2",
+            component: (
+                <AccuracySlide
+                    userAccuracy={wrappedData.data.accuracy}
+                    averageCampusAccuracy={64.5}
+                />
+            ),
+            duration: 12000,
+        },
 
-  const SLIDES = [
-    {
-      id: "1",
-      component: <RatingsSlide highestRating={wrappedData.data.finalRating} />,
-      duration: 12000,
-    },
-    {
-      id: "2",
-      component: <ContestsSlide userContests={wrappedData.data.contestCount} avgCampusContests={6}/>,
-      duration: 12000,
-    },
-    {
-      id: "3",
-      component: <PotdSlide potdSolveCount={wrappedData.data.potdSolves} />,
-      duration: 12000,
-    },
-    {
-      id: "4",
-      component: <CampusLeaderboardSlide currentUser={user} />,
-      duration: 12000,
-    },
-    {
-      id: "5",
-      component: <SummarySlide wrappedData={wrappedData} />,
-      duration: 12000,
-    },
-  ];
+        {
+            id: "3",
+            component: (
+                <TagsSlide
+                    highestSolvedTag="implementation"
+                    userTopTags={wrappedData.data.mostSolvedTags}
+                />
+            ),
+            duration: 12000,
+        },
+        {
+            id: "4",
+            component: (
+                <StreakSlide
+                    userStreak={wrappedData.data.longestStreak}
+                    highestStreak={25}
+                />
+            ),
+            duration: 12000,
+        },
+        {
+            id: "5",
+            component: <RatingsSlide highestRating={wrappedData.data.finalRating} />,
+            duration: 12000,
+        },
+        {
+            id: "6",
+            component: (
+                <ContestsSlide
+                    userContests={wrappedData.data.contestCount}
+                    avgCampusContests={6}
+                />
+            ),
+            duration: 12000,
+        },
+        {
+            id: "7",
+            component: <PotdSlide potdSolveCount={wrappedData.data.potdSolves} />,
+            duration: 12000,
+        },
+        {
+            id: "8",
+            component: <CampusLeaderboardSlide currentUser={user} />,
+            duration: 12000,
+        },
+        {
+            id: "9",
+            component: <SummarySlide wrappedData={wrappedData} />,
+            duration: 12000,
+        },
+    ];
 
-  return <StoryViewer slides={SLIDES} />;
+    return <StoryViewer slides={SLIDES} />;
 }
