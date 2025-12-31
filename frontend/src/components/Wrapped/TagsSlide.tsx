@@ -120,7 +120,7 @@ const TagsSlide = ({ highestSolvedTag, userTopTags }: TagsSlideProps) => {
                             className="space-y-4"
                         >
                             <div
-                                className="text-[2.2rem] sm:text-4xl md:text-[3.0rem] font-extrabold tracking-tight"
+                                className="text-5xl font-extrabold tracking-tight"
                                 style={{ color: COLORS.yellow }}
                             >
                                 <motion.span
@@ -134,7 +134,7 @@ const TagsSlide = ({ highestSolvedTag, userTopTags }: TagsSlideProps) => {
                             </div>
 
                             <div
-                                className="mt-1 text-base sm:text-lg md:text-xl font-medium tracking-wide"
+                                className="mt-1 text-xl font-medium tracking-wide"
                                 style={{ color: "rgba(255,255,255,0.65)" }}
                             >
                                 <motion.span
@@ -147,7 +147,7 @@ const TagsSlide = ({ highestSolvedTag, userTopTags }: TagsSlideProps) => {
                             </div>
 
                             <motion.h1
-                                className="mt-6 text-3xl md:text-[2.0rem] font-bold tracking-tight"
+                                className="mt-6 text-3xl font-bold tracking-tight"
                                 style={{ color: "rgba(255,255,255,0.9)" }}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -187,7 +187,7 @@ const TagsSlide = ({ highestSolvedTag, userTopTags }: TagsSlideProps) => {
                                             delay: i * 0.1,
                                             duration: 0.4,
                                         }}
-                                        className="text-3xl sm:text-3xl md:text-4xl font-bold"
+                                        className="text-4xl font-bold"
                                         style={{ color: TAG_COLORS[i] }}
                                     >
                                         •<ShuffleText text={tag} duration={1300} />

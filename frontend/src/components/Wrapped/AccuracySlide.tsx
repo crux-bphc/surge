@@ -56,7 +56,7 @@ const Background = () => (
         }}
     />
 );
-const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
+const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 45 }) => {
     const [view, setView] = useState<"intro" | "stats">("intro");
 
     const animatedCampusAccuracy = useAnimatedNumber(
@@ -71,11 +71,11 @@ const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
     let subtext = "";
     if (userAccuracy >= 60)
         subtext = "You rank in the top 10 in terms of accuracy";
-    else if (userAccuracy >= 50)
-        subtext = "Your accuracy is better than majority of users.";
+    else if (userAccuracy >= 45)
+        subtext = "Your accuracy is higher than the campus average!";
     else if (userAccuracy === 0)
         subtext = "Held your ground. Consistency is key.";
-    else subtext = "Majority of users have an accuracy less than 50%";
+    else subtext = "We come back harder in 2026!";
     useEffect(() => {
         const t = setTimeout(() => setView("stats"), 6600);
         return () => clearTimeout(t);
@@ -94,7 +94,7 @@ const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
                             className="space-y-4"
                         >
                             <div
-                                className="text-[4.2rem] font-extrabold leading-tight tracking-tight whitespace-norwrap"
+                                className="text-8xl font-extrabold leading-tight tracking-tight whitespace-norwrap"
                                 style={{ color: COLORS.yellow }}
                             >
                                 <motion.span
@@ -129,17 +129,17 @@ const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
                             </div>
 
                             <motion.h1
-                                className="mt-6 text-3xl sm:text-2xl md:text-3xl font-bold tracking-tight"
+                                className="mt-12 text-xl font-bold tracking-tight"
                                 style={{ color: "rgba(255,255,255,0.9)" }}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{
                                     delay: 3.2,
-                                    duration: 1.4,
+                                    duration: .6,
                                     ease: "easeIn",
                                 }}
                             >
-                                Up next: Your accuracy.
+                                Let's see how you did.
                             </motion.h1>
                         </motion.div>
                     )}
@@ -162,7 +162,7 @@ const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
                                 >
-                                    {animatedCampusAccuracy}
+                                    {animatedUserAccuracy}
                                 </motion.span>
                                 <motion.span
                                     initial={{ opacity: 0, y: 12 }}
@@ -173,12 +173,12 @@ const AccuracySlide = ({ userAccuracy = 48, averageCampusAccuracy = 64.5 }) => {
                                 </motion.span>
                             </div>
                             <p
-                                className="text-[1.5rem] md:text-1xl font-bold leading-snug tracking-wide py-4"
+                                className="text-xl font-bold leading-snug tracking-wide py-4"
                                 style={{ color: COLORS.muted }}
                             >
                                 <span
                                     style={{
-                                        color: userAccuracy > 50 ? COLORS.purple : COLORS.red,
+                                        color: COLORS.purple,
                                     }}
                                 >
                                     <motion.span

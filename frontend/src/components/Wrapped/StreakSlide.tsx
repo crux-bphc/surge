@@ -57,7 +57,6 @@ const Background = () => (
 );
 const StreakSlide = ({ userStreak = 12, highestStreak = 25 }) => {
     const [view, setView] = useState<"intro" | "stats">("intro");
-    let diff = highestStreak - userStreak;
     const animatedTotalCount = useAnimatedNumber(
         view === "intro" ? highestStreak : 0,
         600
@@ -68,11 +67,10 @@ const StreakSlide = ({ userStreak = 12, highestStreak = 25 }) => {
     );
     let subtext = "";
     // if (diff>= 23) subtext = "Your highest on campus 🙇";
-    if (diff >= 20) subtext = "Peak shit 🙇";
-    else if (diff >= 15) subtext = "Tuff.";
-    else if (diff >= 5) subtext = "Succesful Grind.";
-    else if (diff === 0) subtext = "Held your ground. Consistency is key.";
-    else subtext = "You prefer touching grass";
+    if (userStreak >= 20) subtext = "Peak shit 🙇";
+    else if (userStreak >= 15) subtext = "That's insane!";
+    else if (userStreak >= 5) subtext = "Succesful Grind.";
+    else subtext = "Great start! The only way now is upwards🔥";
 
     useEffect(() => {
         const t = setTimeout(() => setView("stats"), 5600); // intro
@@ -92,7 +90,7 @@ const StreakSlide = ({ userStreak = 12, highestStreak = 25 }) => {
                             className="space-y-12"
                         >
                             <div
-                                className="text-[2.5rem] font-extrabold leading-tight tracking-tight whitespace-norwrap"
+                                className="text-[2.5rem] font-extrabold leading-tight tracking-tight whitespace-norwrap flex flex-col"
                                 style={{ color: COLORS.red }}
                             >
                                 <motion.span
@@ -100,26 +98,26 @@ const StreakSlide = ({ userStreak = 12, highestStreak = 25 }) => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
                                 >
-                                    2025's Highest Streak:{" "}
+                                    BPHC's longest streak was
                                 </motion.span>
                                 <motion.span
-                                    className=" text-white"
+                                    className="text-[5rem] text-white"
                                     initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.8, duration: 1.0, ease: "easeOut" }}
                                 >
                                     {animatedTotalCount}
-                                </motion.span>{" "}
+                                </motion.span>
                                 <motion.span
                                     initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 1.2, duration: 1.6, ease: "easeOut" }}
+                                    transition={{ delay: 1.2, duration: .6, ease: "easeOut" }}
                                 >
-                                    days{" "}
+                                    days
                                 </motion.span>
                             </div>
                             <div
-                                className="mt-1 text-base sm:text-lg md:text-xl font-medium tracking-wide py-8"
+                                className="mt-1 text-2xl font-medium tracking-wide py-8"
                                 style={{ color: "rgba(255,255,255,0.65)" }}
                             >
                                 <motion.span
@@ -127,7 +125,7 @@ const StreakSlide = ({ userStreak = 12, highestStreak = 25 }) => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 1.8, duration: 2.6, ease: "easeOut" }}
                                 >
-                                    Let's compare it with yours.
+                                    What about you?
                                 </motion.span>
                             </div>
                         </motion.div>
@@ -139,23 +137,29 @@ const StreakSlide = ({ userStreak = 12, highestStreak = 25 }) => {
                             initial={{ opacity: 0, y: 35 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut" }}
-                            className="flex flex-col items-center"
+                            className="flex flex-col items-center space-y-3"
                         >
                             <p
-                                className="uppercase tracking-widest mb-2 text-sm"
+                                className="text-xl uppercase tracking-widest"
                                 style={{ color: COLORS.muted }}
                             >
-                                Your Streak
+                                Your Longest Streak
                             </p>
 
                             <div
-                                className="text-7xl md:text-[6rem] font-black leading-none"
+                                className="text-9xl font-black leading-none"
                                 style={{ color: COLORS.yellow }}
                             >
-                                <motion.span>{animatedCount}</motion.span> days
+                                <motion.span>{animatedCount}</motion.span>
                             </div>
                             <p
-                                className="text-xl md:text-2xl font-bold leading-snug tracking-wide py-8 "
+                                className="uppercase tracking-widest mb-2 text-xl"
+                                style={{ color: COLORS.muted }}
+                            >
+                                days
+                            </p>
+                            <p
+                                className="text-2xl font-bold leading-snug tracking-wide py-8 "
                                 style={{ color: COLORS.muted }}
                             >
                                 {subtext}

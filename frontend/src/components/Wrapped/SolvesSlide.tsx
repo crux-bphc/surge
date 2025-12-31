@@ -68,7 +68,7 @@ const SolvesSlide = ({ userSolves = 12, totalCampusSolves = 540 }) => {
         600
     );
     let subtext = "";
-    if (userSolves >= 1100) subtext = "Your highest on campus 🙇";
+    if (userSolves >= 1100) subtext = "You're highest on campus 🙇";
     else if (userSolves >= 500) subtext = "Peak shit 🙇";
     else if (userSolves >= 200) subtext = "Bro is cooking.";
     else if (userSolves >= 100) subtext = "I see that the grind has started.";
