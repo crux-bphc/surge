@@ -108,7 +108,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
     <div className="relative w-full h-full overflow-hidden flex flex-col">
       <Background />
       <div className="flex-grow relative z-10 mt-4" ref={slideRef}>
-        <div className="h-full flex flex-col items-center justify-center px-6 text-center py-4" style={{ color: COLORS.text }}>
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center py-4 mt-4" style={{ color: COLORS.text }}>
           <div className="flex justify-center items-center gap-2">
             <motion.h1
               className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg"
@@ -192,7 +192,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
           </motion.div>
         </div>
       </div>
-      <div className="flex-shrink-0 flex justify-center mb-12 relative z-20" data-html2canvas-ignore="true">
+      <div className="flex-shrink-0 flex justify-center mb-4 relative z-20" data-html2canvas-ignore="true">
         <motion.button
           onClick={handleShare}
           className="py-3 px-6 rounded-lg flex items-center justify-center gap-2 font-bold text-lg border"
@@ -203,6 +203,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
           Share{" "}<Share2 />
         </motion.button>
       </div>
+      <div className="z-20 mx-auto mb-12 text-sm text-white/40">Press back or esc to exit</div>
     </div>
   );
 };
