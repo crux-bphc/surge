@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 
-const PHRASE = "work hard bro one day 7* codechamp international grandmaster codeforces your cp skill beat Sundar Pichai you become next CEO google";
+const PHRASE = "hop on that SI grind work hard bro one day 7* codechamp international grandmaster codeforces your cp skill beat Sundar Pichai you become next CEO google agle saal phodenge ";
 
 const BACKGROUND_TEXT = PHRASE.repeat(100)
 
@@ -9,7 +9,7 @@ export default function WrappedBanner() {
     <>
       <div className="relative flex flex-col md:flex-row md:items-center w-full bg-[#1C4D8D]/90 text-white py-4 px-6 rounded-lg mb-6 overflow-hidden">
         <div className="absolute bg-linear-155 from-black/40 to-black/5 z-2 inset-0"></div>
-        <div className="absolute text-white/20 origin-top top-0 left-1/2 -translate-x-1/2 w-[128rem] -rotate-10 animate-scroll-code pointer-events-none select-none">
+        <div className="absolute text-white/20 origin-top top-0 left-1/2 -translate-x-1/2 w-[148rem] -rotate-10 animate-scroll-code pointer-events-none select-none">
           <div>
             {BACKGROUND_TEXT}
             {BACKGROUND_TEXT}
@@ -24,10 +24,10 @@ export default function WrappedBanner() {
             Take a look back at your CC journey in 2025!
           </p>
         </div>
-        <button className="z-3 mt-4 md:m-0 md:ml-auto bg-white text-[#1C4D8D] text-sm md:text-md font-bold py-2 px-4 rounded-lg hover:bg-gray-200 transition">
+        <a href="/wrapped" className="z-3 mt-4 md:m-0 md:ml-auto bg-white text-[#1C4D8D] text-center text-sm md:text-md font-bold py-2 px-4 rounded-lg hover:bg-gray-200 transition">
           View Your Wrapped{" "}
           <ArrowRight className="inline-block p-0 m-0" strokeWidth={2.5} />
-        </button>
+        </a>
       </div>
       <style>
         {`
@@ -37,7 +37,7 @@ export default function WrappedBanner() {
           }
 
           .animate-scroll-code {
-            animation: scroll-code 60s linear infinite;
+            animation: scroll-code 90s linear infinite;
           }
         `}
       </style>
