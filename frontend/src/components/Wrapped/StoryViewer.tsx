@@ -8,6 +8,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import IntroSlide from "./IntroSlide";
+import UnmutePrompt from "./UnmutePrompt";
 
 type Slide = {
   id: string;
@@ -215,6 +216,7 @@ export default function StoryViewer({
         className="relative w-full h-dvh md:h-[calc(100dvh-3rem)] max-w-md mx-auto"
         onPointerUp={handlePointerUp}
       >
+        <UnmutePrompt toggleMute={toggleMute} />
         <button
           className={`absolute w-12 h-12 bottom-4 right-4 rounded-full ${muted ? "bg-black/30" : "bg-black/10"} z-50 flex items-center justify-center`}
           onClick={handleVolumeClick}
