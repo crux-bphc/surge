@@ -163,18 +163,11 @@ function PixelNoiseBackground() {
 }
 
 interface IntroSlideProps {
-  setStarted: (started: boolean) => void;
+  handleStart: () => void;
 }
 
-export default function IntroSlide({ setStarted }: IntroSlideProps) {
-  function handleStart() {
-    if (setStarted) setStarted(true);
-    try {
-      document.documentElement.requestFullscreen();
-    } catch (err) {
-      console.error("Error attempting to enable full-screen mode:", err);
-    }
-  }
+export default function IntroSlide({ handleStart }: IntroSlideProps) {
+
 
   return (
     <div className="flex flex-col justify-center items-center h-dvh">

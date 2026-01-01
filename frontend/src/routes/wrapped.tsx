@@ -13,7 +13,6 @@ import TagsSlide from "../components/Wrapped/TagsSlide";
 import StreakSlide from "../components/Wrapped/StreakSlide";
 import CampusLeaderboardSlide from "../components/Wrapped/CampusLeaderboardSlide";
 import SummarySlide from "../components/Wrapped/SummarySlide";
-import IntroSlide from "../components/Wrapped/IntroSlide";
 
 import dancingQueen from "../assets/wrapped/dancing-queen.mp3";
 
@@ -42,7 +41,6 @@ function RouteComponent() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const { user, loading } = useAuth();
-    const [started, setStarted] = useState<boolean>(false);
 
     useEffect(() => {
         if (loading) return;
@@ -153,5 +151,5 @@ function RouteComponent() {
         },
     ];
 
-    return started ? <StoryViewer slides={SLIDES} setStarted={setStarted}/> : <IntroSlide setStarted={setStarted} />;
+    return <StoryViewer slides={SLIDES}  introAudioSrc={dancingQueen}/>;
 }
