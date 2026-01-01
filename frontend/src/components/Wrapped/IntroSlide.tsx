@@ -170,7 +170,7 @@ export default function IntroSlide({ handleStart }: IntroSlideProps) {
 
 
   return (
-    <div className="flex flex-col justify-center items-center h-dvh">
+    <div className="flex flex-col justify-center items-center h-full">
       <div className="relative w-full h-dvh md:h-[calc(100dvh-3rem)] max-w-md mx-auto">
         <div className="w-full h-dvh md:h-[calc(100dvh-3rem)] bg-white/20 md:rounded-lg overflow-hidden md:outline-2 md:outline-[#1C4D8D]/20 md:shadow-lg md:shadow-[#1C4D8D]/20">
           <div className="relative w-full h-full flex flex-col items-center justify-center px-6 text-center text-white">
