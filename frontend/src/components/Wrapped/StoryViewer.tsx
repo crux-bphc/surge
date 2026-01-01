@@ -9,11 +9,12 @@ type Slide = {
 
 interface StoryViewerProps {
   slides: Slide[];
+  setStarted: (started: boolean) => void;
 }
 
 const DEFAULT_DURATION = 5000;
 
-export default function StoryViewer({ slides }: StoryViewerProps) {
+export default function StoryViewer({ slides, setStarted }: StoryViewerProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
 
@@ -35,6 +36,8 @@ export default function StoryViewer({ slides }: StoryViewerProps) {
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
       resetSlide();
+    } else {
+      setStarted(false);
     }
   }, [currentIndex]);
 
