@@ -61,7 +61,7 @@ const PotdSlide = ({ potdSolveCount = 0 }) => {
   const [view, setView] = useState<"intro" | "stats">("intro");
 
   const subText =
-    potdSolveCount < 4 ? "A strong start." : "That’s discipline.";
+    potdSolveCount == 0 ? "New year new me surely." : potdSolveCount < 4 ? "A strong start." : "That’s discipline.";
 
   useEffect(() => {
     const t = setTimeout(() => setView("stats"), 2600);
