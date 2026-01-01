@@ -15,6 +15,8 @@ import CampusLeaderboardSlide from "../components/Wrapped/CampusLeaderboardSlide
 import SummarySlide from "../components/Wrapped/SummarySlide";
 import IntroSlide from "../components/Wrapped/IntroSlide";
 
+import dancingQueen from "../assets/wrapped/dancing-queen.mp3";
+
 const fetchWrappedData = async (id: string) => {
     try {
         const res = await axios.get(
@@ -88,6 +90,7 @@ function RouteComponent() {
                 />
             ),
             duration: 12000,
+            audioSrc: dancingQueen,
         },
         {
             id: "2",
