@@ -29,6 +29,7 @@ interface ProgressBarProps {
 }
 
 const DEFAULT_DURATION = 5000;
+const AUDIO_VOLUME = 0.2;
 
 function ProgressBar({ slides, currentIndex, progress }: ProgressBarProps) {
   return (
@@ -92,6 +93,7 @@ export default function StoryViewer({
       audio.currentTime = 0;
       audio.src = introAudioSrc;
       audio.muted = muted;
+      audio.volume = AUDIO_VOLUME*2
       audio.play().catch((e) => console.warn("Audio playback failed:", e));
     }
 
@@ -120,6 +122,7 @@ export default function StoryViewer({
       audio.src = currentSlide.audioSrc;
       audio.muted = muted;
       audio.currentTime = 0;
+      audio.volume = AUDIO_VOLUME
       audio.play().catch((e) => console.warn("Audio playback failed:", e));
     } else {
       audio.removeAttribute("src");
@@ -153,6 +156,7 @@ export default function StoryViewer({
           const src = started ? slides[currentIndex]?.audioSrc : introAudioSrc;
           if (src) audio.src = src;
         }
+        audio.volume = AUDIO_VOLUME
         audio.play().catch((e) => console.warn("Force play failed:", e));
       }
 
