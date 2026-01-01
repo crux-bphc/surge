@@ -1,3 +1,4 @@
+import { Volume2, VolumeOff } from "lucide-react";
 import { motion, useMotionValue, useTransform } from "motion/react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
@@ -17,6 +18,7 @@ const DEFAULT_DURATION = 5000;
 
 export default function StoryViewer({ slides, setStarted }: StoryViewerProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [muted, setMuted] = useState<boolean>(false);
 
   const progress = useMotionValue(0);
 
@@ -108,12 +110,34 @@ export default function StoryViewer({ slides, setStarted }: StoryViewerProps) {
     }
   };
 
+  const handleVolumeToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (muted) {
+      audio.muted = false;
+      setMuted(false);
+    } else {
+      audio.muted = true;
+      setMuted(true);
+    }
+  }
+
   return (
     <div className="flex flex-col justify-center items-center h-dvh">
       <div
         className="relative w-full h-dvh md:h-[calc(100dvh-3rem)] max-w-md mx-auto"
         onPointerUp={handlePointerUp}
       >
+        <button className="absolute w-12 h-12 bottom-4 right-4 rounded-full bg-black/10 z-50 flex items-center justify-center" onClick={handleVolumeToggle} onPointerUp={(e) => e.stopPropagation()}>
+          {muted ? (
+            <VolumeOff className="w-6 h-6 text-white" />
+          ) : (
+            <Volume2 className="w-6 h-6 text-white/70" />
+          )}
+        </button>
         <motion.div className="absolute top-0 left-0 right-0 z-50 flex gap-1 p-4">
           {slides.map((_, index) => (
             <div
