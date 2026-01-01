@@ -15,6 +15,15 @@ import CampusLeaderboardSlide from "../components/Wrapped/CampusLeaderboardSlide
 import SummarySlide from "../components/Wrapped/SummarySlide";
 
 import dancingQueen from "../assets/wrapped/dancing-queen.mp3";
+import franz1 from "../assets/wrapped/franz-1.mp3";
+import franz2 from "../assets/wrapped/franz-2.mp3";
+import franz3 from "../assets/wrapped/franz-3.mp3";
+import dream1 from "../assets/wrapped/dream-1.mp3";
+import dream2 from "../assets/wrapped/dream-2.mp3";
+import dream3 from "../assets/wrapped/dream-3.mp3";
+import dream4 from "../assets/wrapped/dream-4.mp3";
+import alive1 from "../assets/wrapped/alive-1.mp3";
+import alive2 from "../assets/wrapped/alive-2.mp3";
 
 const fetchWrappedData = async (id: string) => {
     try {
@@ -87,8 +96,8 @@ function RouteComponent() {
                     totalCampusSolves={540}
                 />
             ),
-            duration: 12000,
-            audioSrc: dancingQueen,
+            duration: 11000,
+            audioSrc: franz1,
         },
         {
             id: "2",
@@ -97,7 +106,8 @@ function RouteComponent() {
                     userAccuracy={wrappedData.data.accuracy*100}
                 />
             ),
-            duration: 12000,
+            duration: 11000,
+            audioSrc: franz2,
         },
         {
             id: "3",
@@ -107,7 +117,8 @@ function RouteComponent() {
                     userTopTags={wrappedData.data.mostSolvedTags}
                 />
             ),
-            duration: 12000,
+            duration: 11000,
+            audioSrc: franz3,
         },
         {
             id: "4",
@@ -117,12 +128,14 @@ function RouteComponent() {
                     highestStreak={25}
                 />
             ),
-            duration: 12000,
+            duration: 11000,
+            audioSrc: dream1,
         },
         {
             id: "5",
             component: <RatingsSlide initialRating={wrappedData.data.initialRating} highestRating={wrappedData.data.highestRating} />,
-            duration: 12000,
+            duration: 11000,
+            audioSrc: dream2,
         },
         {
             id: "6",
@@ -132,22 +145,26 @@ function RouteComponent() {
                     avgCampusContests={6}
                 />
             ),
-            duration: 12000,
+            duration: 11000,
+            audioSrc: dream3,
         },
         {
             id: "7",
             component: <PotdSlide potdSolveCount={wrappedData.data.potdSolves} />,
-            duration: 12000,
+            duration: 11000,
+            audioSrc: dream4,
         },
         {
             id: "8",
             component: <CampusLeaderboardSlide currentUser={user} />,
-            duration: 12000,
+            duration: 11000,
+            audioSrc: alive1,
         },
         {
             id: "9",
             component: <SummarySlide wrappedData={wrappedData} />,
-            duration: 12000,
+            duration: 11000,
+            audioSrc: alive2,
         },
     ];
 
