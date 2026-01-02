@@ -108,7 +108,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
     <div className="relative w-full h-full overflow-hidden flex flex-col">
       <Background />
       <div className="flex-grow relative z-10 mt-4" ref={slideRef}>
-        <div className="h-full flex flex-col items-center justify-center px-6 text-center py-4 mt-4" style={{ color: COLORS.text }}>
+        <div className="h-full flex flex-col items-center justify-center px-2 text-center py-4 mt-4" style={{ color: COLORS.text }}>
           <div className="flex justify-center items-center gap-2">
             <motion.h1
               className="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-lg"
@@ -136,7 +136,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
                 whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
               >
                 <p className="text-sm" style={{ color: COLORS.subtext0 }}>Total Solved</p>
-                <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{data.solvedCount}</p>
+                <p className="text-2xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{data.solvedCount}</p>
               </motion.div>
               <motion.div
                 className="p-4 rounded-md border transition-all"
@@ -144,7 +144,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
                 whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
               >
                 <p className="text-sm" style={{ color: COLORS.subtext0 }}>Final Rating</p>
-                <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.green }}>{data.finalRating}</p>
+                <p className="text-2xl md:text-4xl font-bold" style={{ color: COLORS.green }}>{data.finalRating}</p>
               </motion.div>
               <motion.div
                 className="p-4 rounded-md border transition-all"
@@ -152,7 +152,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
                 whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
               >
                 <p className="text-sm" style={{ color: COLORS.subtext0 }}>Longest Streak</p>
-                <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{data.longestStreak} days</p>
+                <p className="text-2xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>99 days</p>
               </motion.div>
               <motion.div
                 className="p-4 rounded-md border transition-all"
@@ -160,7 +160,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
                 whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
               >
                 <p className="text-sm" style={{ color: COLORS.subtext0 }}>Accuracy</p>
-                <p className="text-3xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{(data.accuracy * 100).toFixed(2)}%</p>
+                <p className="text-2xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{(data.accuracy * 100).toFixed(2)}%</p>
               </motion.div>
             </div>
 
