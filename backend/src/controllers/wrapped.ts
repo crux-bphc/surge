@@ -2,7 +2,7 @@ import { db } from "../drizzle/db";
 import { eq } from "drizzle-orm";
 import { wrapped25, users } from "../drizzle/schema";
 import type { Request, Response } from "express";
-import { generateAllWrappedStats, generateUserWrappedStats } from "../scripts/generateWrappedStats";
+import { generateAllWrappedStats } from "../scripts/generateWrappedStats";
 
 type User = typeof users.$inferSelect;
 
@@ -16,17 +16,13 @@ export const getWrappedStats = async (req: Request, res: Response): Promise<void
     }
 
     try {
-        let stats = await db.query.wrapped25.findFirst({
+        const stats = await db.query.wrapped25.findFirst({
             where: eq(wrapped25.userId, userId),
         });
 
         if (!stats) {
-            try {
-                stats = await generateUserWrappedStats(userId);
-            } catch (error) {
-                res.status(404).json({ success: false, message: "Wrapped stats not found for this user." });
-                return;
-            }
+            res.status(404).json({ success: false, message: "Wrapped stats not found for this user." });
+            return;
         }
 
         res.status(200).json({ success: true, data: stats });

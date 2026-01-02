@@ -193,44 +193,6 @@ async function calculateRanks() {
     console.log("Ranks calculated");
 }
 
-export async function generateUserWrappedStats(userId: string) {
-    const user = await db.query.users.findFirst({
-        where: eq(users.id, userId)
-    });
-
-    if (!user) {
-        throw new Error(`User with ID ${userId} not found`);
-    }
-
-    const stats = await generateStats(user);
-    if (stats) {
-        await db.insert(wrapped25).values(stats).onConflictDoNothing();
-        await db.update(wrapped25).set({
-            submissionCount: stats.submissionCount,
-            solvedCount: stats.solvedCount,
-            monthlySolves: stats.monthlySolves,
-            accuracy: stats.accuracy,
-            mostSolvedTags: stats.mostSolvedTags,
-            longestStreak: stats.longestStreak,
-            contestCount: stats.contestCount,
-            initialRating: stats.initialRating,
-            finalRating: stats.finalRating,
-            highestRating: stats.highestRating,
-            potdSolves: stats.potdSolves
-        }).where(eq(wrapped25.userId, stats.userId));
-
-        await calculateRanks();
-
-        const updatedStats = await db.query.wrapped25.findFirst({
-            where: eq(wrapped25.userId, userId)
-        });
-
-        return updatedStats;
-    } else {
-        throw new Error(`Could not generate stats for ${userId}`);
-    }
-}
-
 export async function generateAllWrappedStats() {
     console.log("Generating wrapped stats for all users");
     const allUsers = await db.query.users.findMany();
