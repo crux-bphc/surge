@@ -23,7 +23,7 @@ export default function UnmutePrompt({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center"
+          className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center md:rounded-lg"
           // Prevent clicks on the overlay from triggering slide navigation
           onPointerUp={(e) => e.stopPropagation()}
         >
