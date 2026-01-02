@@ -152,7 +152,7 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
                 whileHover={{ scale: 1.02, borderColor: COLORS.blue }}
               >
                 <p className="text-sm" style={{ color: COLORS.subtext0 }}>Longest Streak</p>
-                <p className="text-2xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>99 days</p>
+                <p className="text-2xl md:text-4xl font-bold" style={{ color: COLORS.yellow }}>{data.longestStreak} days</p>
               </motion.div>
               <motion.div
                 className="p-4 rounded-md border transition-all"
