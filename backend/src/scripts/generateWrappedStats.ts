@@ -155,7 +155,7 @@ async function calculateRanks() {
     }
 
     const sortedByRating = combinedStats
-        .filter(s => s.finalRating !== null || s.finalRating !== 0)
+        .filter(s => s.finalRating !== null && s.finalRating !== 0)
         .sort((a, b) => (b.finalRating ?? 0) - (a.finalRating ?? 0));
     
     const rankUpdates = sortedByRating.map((stat, i) =>
