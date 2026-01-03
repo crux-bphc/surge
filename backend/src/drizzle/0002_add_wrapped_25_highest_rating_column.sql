@@ -1,1 +1,0 @@
-ALTER TABLE "wrapped_25" ADD COLUMN "highest_rating" integer;
