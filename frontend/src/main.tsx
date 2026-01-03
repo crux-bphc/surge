@@ -17,6 +17,10 @@ declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
+
+  interface StaticDataRouteOption {
+    fullScreen?: boolean;
+  }
 }
 
 const rootElement = document.getElementById("root")!;

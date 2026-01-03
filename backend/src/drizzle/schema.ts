@@ -9,6 +9,7 @@ import {
   jsonb,
   pgEnum,
   bigint,
+  real,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
@@ -146,3 +147,27 @@ export const cfUserStats = pgTable("cf_user_stats", {
     .defaultNow()
     .notNull(),
 });
+
+export type MonthlySolves = {
+  month: string,
+  label: string,
+  solvedCount: number
+}[];
+
+export const wrapped25 = pgTable("wrapped_25", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  submissionCount: integer("submission_count").notNull(),
+  solvedCount: integer("solved_count").notNull(),
+  monthlySolves: jsonb("monthly_solves").$type<MonthlySolves>().notNull(),
+  accuracy: real("accuracy").notNull(),
+  mostSolvedTags: jsonb("most_solved_tags").$type<string[]>().notNull(),
+  longestStreak: integer("longest_streak").notNull().default(1),
+  contestCount: integer("contest_count").notNull().default(0),
+  initialRating: integer("initial_rating"),
+  finalRating: integer("final_rating"),
+  highestRating: integer("highest_rating"),
+  potdSolves: integer("potd_solves"),
+  campusRank: integer("campus_rank").notNull(),
+  batchRank: integer("batch_rank").notNull(),
+})
