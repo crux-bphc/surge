@@ -33,7 +33,7 @@ const AUDIO_ASSETS = [
 ];
 
 const preloadAudio = (src: string) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const audio = new Audio(src);
         audio.preload = "auto";
         
