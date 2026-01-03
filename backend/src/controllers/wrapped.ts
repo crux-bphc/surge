@@ -1,5 +1,5 @@
 import { db } from "../drizzle/db";
-import { eq } from "drizzle-orm";
+import { eq, ne, asc } from "drizzle-orm";
 import { wrapped25, users } from "../drizzle/schema";
 import type { Request, Response } from "express";
 import { generateAllWrappedStats } from "../scripts/generateWrappedStats";
@@ -28,6 +28,22 @@ export const getWrappedStats = async (req: Request, res: Response): Promise<void
         res.status(200).json({ success: true, data: stats });
     } catch (error) {
         console.error("Error fetching wrapped stats:", error);
+        res.status(500).json({ success: false, message: "Internal server error." });
+    }
+};
+
+export const getWrappedLeaderboard = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const leaderboard = await db.select({
+            id: users.id,
+            name: users.name,
+            campusRank: wrapped25.campusRank,
+            finalRating: wrapped25.finalRating
+        }).from(wrapped25).innerJoin(users, eq(wrapped25.userId, users.id)).orderBy(asc(wrapped25.campusRank)).where(ne(wrapped25.campusRank, 0));
+
+        res.status(200).json({ success: true, data: leaderboard });
+    } catch (error) {
+        console.error("Error fetching wrapped leaderboard:", error);
         res.status(500).json({ success: false, message: "Internal server error." });
     }
 };

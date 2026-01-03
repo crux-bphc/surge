@@ -5,12 +5,8 @@ import axios from "axios";
 type LeaderboardUser = {
   id: string;
   name: string;
-  email: string;
-  cfHandle: string;
-  cfRating: number;
-  pfpUrl: string;
-  batch: string | null;
-  rank: number;
+  campusRank: number;
+  finalRating: number;
 };
 
 interface CampusLeaderboardSlideProps {
@@ -61,14 +57,9 @@ const CampusLeaderboardSlide = ({ currentUser }: CampusLeaderboardSlideProps) =>
     const fetchLeaderboard = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get("/api/leaderboard");
-        
-        const rankedLeaderboard: LeaderboardUser[] = res.data.map((user: any, index: number) => ({
-          ...user,
-          rank: index + 1,
-        }));
+        const res = await axios.get("/api/wrapped/leaderboard", {withCredentials: true});
 
-        setLeaderboard(rankedLeaderboard);
+        setLeaderboard(res.data.data);
         setIsError(false);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
@@ -142,10 +133,10 @@ const CampusLeaderboardSlide = ({ currentUser }: CampusLeaderboardSlideProps) =>
                     transition={{ duration: 0.5 }}
                   >
                     <div className="flex items-center">
-                      <span className="text-xl font-bold w-8" style={{ color: user.id === currentUser.id ? 'white' : COLORS.muted }}>{user.rank}</span>
+                      <span className="text-xl font-bold w-8" style={{ color: user.id === currentUser.id ? 'white' : COLORS.muted }}>{user.campusRank}</span>
                       <span className="font-semibold">{user.name}</span>
                     </div>
-                    <span className="font-bold" style={{ color: COLORS.yellow }}>{user.cfRating}</span>
+                    <span className="font-bold" style={{ color: COLORS.yellow }}>{user.finalRating}</span>
                   </motion.div>
                 ))}
               </div>
@@ -153,20 +144,31 @@ const CampusLeaderboardSlide = ({ currentUser }: CampusLeaderboardSlideProps) =>
               {!isUserInTop3 && currentUserRanked && (
                 <motion.div
                   key={currentUserRanked.id}
-                  className="flex flex-col items-center justify-between p-4 rounded-lg mt-6"
-                  style={{ backgroundColor: COLORS.userHighlight }}
+                  className="flex flex-col items-center justify-between mt-6"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6, duration: 0.5 }}
                 >
-                  <p className="text-lg font-semibold mb-2">Your Rank</p>
-                  <div className="flex items-center justify-between w-full">
+                  <p className="text-xl font-semibold mb-2">Your Rank</p>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg" style={{backgroundColor: COLORS.userHighlight}}>
                     <div className="flex items-center">
-                      <span className="text-2xl font-bold w-10 text-white">{currentUserRanked.rank}</span>
+                      <span className="text-2xl font-bold w-10 text-white">{currentUserRanked.campusRank}</span>
                       <span className="text-lg font-semibold">{currentUserRanked.name}</span>
                     </div>
-                    <span className="text-xl font-bold" style={{ color: COLORS.yellow }}>{currentUserRanked.cfRating}</span>
+                    <span className="text-xl font-bold" style={{ color: COLORS.yellow }}>{currentUserRanked.finalRating}</span>
                   </div>
+                </motion.div>
+              )}
+
+              {!currentUserRanked && (
+                <motion.div
+                  key={currentUser.id}
+                  className="flex flex-col items-center justify-between mt-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.5 }}
+                >
+                  <p className="text-xl font-semibold mb-2">2026 is the perfect year to start your leaderboard journey!</p>
                 </motion.div>
               )}
             </motion.div>
