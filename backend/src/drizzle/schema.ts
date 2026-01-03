@@ -156,7 +156,7 @@ export type MonthlySolves = {
 
 export const wrapped25 = pgTable("wrapped_25", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id),
+  userId: text("user_id").notNull().references(() => users.id).unique(),
   submissionCount: integer("submission_count").notNull(),
   solvedCount: integer("solved_count").notNull(),
   monthlySolves: jsonb("monthly_solves").$type<MonthlySolves>().notNull(),

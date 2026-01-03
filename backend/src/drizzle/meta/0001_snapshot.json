@@ -1,5 +1,5 @@
 {
-  "id": "49999ea9-9ee6-4d07-a7a3-1590cbb798c1",
+  "id": "335e119b-5faa-46ca-8651-5f40253d9945",
   "prevId": "8884fced-bb5e-4c80-90ec-93cb24c5e727",
   "version": "7",
   "dialect": "postgresql",
@@ -748,6 +748,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "highest_rating": {
+          "name": "highest_rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "potd_solves": {
           "name": "potd_solves",
           "type": "integer",
@@ -784,7 +790,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "wrapped_25_user_id_unique": {
+          "name": "wrapped_25_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
