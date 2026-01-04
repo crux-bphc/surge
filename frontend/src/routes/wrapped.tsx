@@ -25,6 +25,27 @@ import dream4 from "../assets/wrapped/dream-4.mp3";
 import alive1 from "../assets/wrapped/alive-1.mp3";
 import alive2 from "../assets/wrapped/alive-2.mp3";
 
+const AUDIO_ASSETS = [
+    dancingQueen,
+    franz1, franz2, franz3,
+    dream1, dream2, dream3, dream4,
+    alive1, alive2
+];
+
+const preloadAudio = (src: string) => {
+    return new Promise((resolve) => {
+        const audio = new Audio(src);
+        audio.preload = "auto";
+        
+        audio.oncanplaythrough = () => resolve(src);
+        
+        audio.onerror = () => {
+            console.warn(`Failed to load audio: ${src}`);
+            resolve(null); 
+        };
+    });
+};
+
 const fetchWrappedData = async (id: string) => {
     try {
         const res = await axios.get(
@@ -64,6 +85,8 @@ function RouteComponent() {
                 setIsLoading(true);
                 const data = await fetchWrappedData(user.id);
                 setWrappedData(data);
+                const audioPromises = AUDIO_ASSETS.map(src => preloadAudio(src));
+                await Promise.all(audioPromises);
             } catch (error) {
                 console.error("Error fetching wrapped data:", error);
             } finally {

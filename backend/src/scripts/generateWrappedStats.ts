@@ -155,9 +155,9 @@ async function calculateRanks() {
     }
 
     const sortedByRating = combinedStats
-        .filter(s => s.user.cfRating !== null)
-        .sort((a, b) => b.user.cfRating! - a.user.cfRating!);
-
+        .filter(s => s.finalRating !== null && s.finalRating !== 0)
+        .sort((a, b) => (b.finalRating ?? 0) - (a.finalRating ?? 0));
+    
     const rankUpdates = sortedByRating.map((stat, i) =>
         db.update(wrapped25).set({ campusRank: i + 1 }).where(eq(wrapped25.id, stat.id))
     );
@@ -178,8 +178,8 @@ async function calculateRanks() {
     const batchRankUpdates = [];
     for (const batch in batches) {
         const sortedBatch = batches[batch]
-            .filter(s => s.user.cfRating !== null)
-            .sort((a, b) => b.user.cfRating! - a.user.cfRating!);
+            .filter(s => s.finalRating !== null && s.finalRating !== 0)
+            .sort((a, b) => (b.finalRating ?? 0) - (a.finalRating ?? 0));
 
         for (let i = 0; i < sortedBatch.length; i++) {
             const stat = sortedBatch[i];

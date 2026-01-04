@@ -169,11 +169,11 @@ const SummarySlide = ({ wrappedData }: SummarySlideProps) => {
             >
               <div>
                 <p className="text-sm" style={{ color: COLORS.subtext0 }}>Campus Rank</p>
-                <p className="text-3xl font-bold" style={{ color: COLORS.mauve }}>{data.campusRank}</p>
+                <p className="text-3xl font-bold" style={{ color: COLORS.mauve }}>{data.campusRank == 0 ? "-" : data.campusRank}</p>
               </div>
               <div>
                 <p className="text-sm" style={{ color: COLORS.subtext0 }}>Batch Rank</p>
-                <p className="text-3xl font-bold" style={{ color: COLORS.mauve }}>{data.batchRank}</p>
+                <p className="text-3xl font-bold" style={{ color: COLORS.mauve }}>{data.batchRank == 0 ? "-" : data.batchRank}</p>
               </div>
             </div>
 
