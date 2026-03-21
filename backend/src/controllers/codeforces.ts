@@ -119,3 +119,31 @@ export async function fetchUserSubmissions(
     `Enqueued fetchUserSubmissions job for ${cfHandle} (Priority: ${priority})`
   );
 }
+
+export async function refreshHistoricHandles(priority: number = 5) {
+  const dateKey = new Date().toISOString().slice(0, 10); 
+  const userData = await db
+    .select({
+      cfHandle: users.cfHandle,
+      userId: users.id,
+    })
+    .from(users);
+
+  for (const user of userData) {
+    if (!user.cfHandle || !user.userId) continue;
+
+    await addWithRetry(
+      codeforcesQueue,
+      "cf-job",
+      {
+        type: "user.resolveHandle",
+        handle: user.cfHandle,
+        userId: user.userId,
+      },
+      {
+        priority,
+        jobId: `${user.userId}-ResolveHandle-${dateKey}`,
+      }
+    );
+  }
+}

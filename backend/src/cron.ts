@@ -4,7 +4,15 @@ import {
   fetchProblems,
   fetchSubmissions,
   fetchRatingChanges,
+  refreshHistoricHandles,
 } from "./controllers/codeforces";
+
+function isDec21ToJan11UTC(d: Date) {
+  const month = d.getUTCMonth() + 1; 
+  const day = d.getUTCDate(); 
+
+  return (month === 12 && day >= 21) || (month === 1 && day <= 11);
+}
 
 export function startCronJobs() {
   cron.schedule("0 */2 * * *", async () => {
@@ -25,5 +33,15 @@ export function startCronJobs() {
       `[Cron] Refreshing rating changes at ${new Date().toISOString()}`
     );
     await fetchRatingChanges();
+  });
+
+  cron.schedule("0 0 * * *", async () => {
+    const now = new Date();
+    if (!isDec21ToJan11UTC(now)) return;
+
+    console.log(
+      `[Cron] Refreshing historic CF handles at ${now.toISOString()}`
+    );
+    await refreshHistoricHandles();
   });
 }

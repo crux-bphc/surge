@@ -10,6 +10,7 @@ import {
   updateProblems,
   updateUserRatings,
 } from "../utils/dbHelpers";
+import { linkCfHandle } from "../codeforces_api";
 
 //Keep track of problem key to problem id relations in local map
 //Problem key is contestId-problemIndex, like 2323-B, 122-C, etc.
@@ -45,6 +46,10 @@ async function init() {
         url = `https://codeforces.com/api/user.rating?handle=${handle}`;
       } else if (type === "user.submissions") {
         url = `https://codeforces.com/api/user.status?handle=${handle}`;
+      } else if (type === "user.resolveHandle") {
+        //This returns unlike the other ones as the url logic is already handled in linkCfHandle() function itself so I'm just calling the function directly.
+        await linkCfHandle(handle, userId);
+        return;
       } else if (type === "problemset.problems") {
         url = `https://codeforces.com/api/problemset.problems`;
       } else if (type === "contest.list") {
