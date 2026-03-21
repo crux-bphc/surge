@@ -68,7 +68,7 @@ export async function verifySubmission(
 export async function linkCfHandle(cfHandle: string, userId: string) {
   try {
     const res = await fetch(
-      `https://codeforces.com/api/user.info?handles=${cfHandle}`
+      `https://codeforces.com/api/user.info?handles=${cfHandle}&checkHistoricHandles=true`
     );
     const fetchedUser = await res.json();
     if (fetchedUser.status === "OK") {
@@ -76,7 +76,7 @@ export async function linkCfHandle(cfHandle: string, userId: string) {
       const [linkedUser] = await db
         .update(users)
         .set({
-          cfHandle: cfHandle,
+          cfHandle: userData.handle,
           cfRating: userData.rating,
         })
         .where(eq(users.id, userId))
