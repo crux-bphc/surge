@@ -170,4 +170,83 @@ export const wrapped25 = pgTable("wrapped_25", {
   potdSolves: integer("potd_solves"),
   campusRank: integer("campus_rank").notNull(),
   batchRank: integer("batch_rank").notNull(),
-})
+});
+
+export const campusContestStatusEnum = pgEnum("campus_contest_status", [
+  "scheduled",
+  "live",
+  "ended",
+]);
+
+export const campusContests = pgTable("campus_contests", {
+  id: serial("id").primaryKey(),
+  startTime: timestamp("start_time", { precision: 0, mode: "string" }).notNull(),
+  durationMinutes: integer("duration_minutes").notNull(),
+  cfContestId: integer("cf_contest_id"),
+  status: campusContestStatusEnum("status").notNull().default("scheduled"),
+  lastSyncedAt: timestamp("last_synced_at", { precision: 3, mode: "string" }),
+  createdAt: timestamp("created_at", { precision: 3, mode: "string" })
+    .defaultNow()
+    .notNull(),
+});
+
+export const campusGroups = pgTable(
+  "campus_groups",
+  {
+    id: serial("id").primaryKey(),
+    groupName: text("group_name").notNull(),
+    contestId: integer("contest_id")
+      .notNull()
+      .references(() => campusContests.id, { onDelete: "cascade" }),
+    contestGroupScore: integer("contest_group_score").notNull().default(0),
+  },
+  (table) => [
+    uniqueIndex("campus_groups_contest_group_name").on(table.contestId, table.groupName),
+  ]
+);
+
+export const campusContestParticipants = pgTable(
+  "campus_contest_participants",
+  {
+    id: serial("id").primaryKey(),
+    contestId: integer("contest_id")
+      .notNull()
+      .references(() => campusContests.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    contestParticipantScore: integer("contest_participant_score").notNull().default(0),
+    groupId: integer("group_id")
+      .notNull()
+      .references(() => campusGroups.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    uniqueIndex("campus_contest_participants_contest_user").on(
+      table.contestId,
+      table.userId
+    ),
+  ]
+);
+
+export const campusContestSolves = pgTable(
+  "campus_contest_solves",
+  {
+    id: serial("id").primaryKey(),
+    participantId: integer("participant_id")
+      .notNull()
+      .references(() => campusContestParticipants.id, { onDelete: "cascade" }),
+    contestId: integer("contest_id")
+      .notNull()
+      .references(() => campusContests.id, { onDelete: "cascade" }),
+    problemId: text("problem_id").notNull(),
+    solvedAt: timestamp("solved_at", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("campus_contest_solves_participant_problem").on(
+      table.participantId,
+      table.problemId
+    ),
+  ]
+);
