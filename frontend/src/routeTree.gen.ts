@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResourceIndexRouteImport } from './routes/resource/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as LeaderboardIndexRouteImport } from './routes/leaderboard/index'
+import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as ResourceSlugRouteImport } from './routes/resource/$slug'
 import { Route as ProfileSlugRouteImport } from './routes/profile/$slug'
 import { Route as LeaderboardSlugRouteImport } from './routes/leaderboard/$slug'
@@ -55,6 +56,11 @@ const LeaderboardIndexRoute = LeaderboardIndexRouteImport.update({
   path: '/leaderboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResourceSlugRoute = ResourceSlugRouteImport.update({
   id: '/resource/$slug',
   path: '/resource/$slug',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard/$slug': typeof LeaderboardSlugRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/resource/$slug': typeof ResourceSlugRoute
+  '/events': typeof EventsIndexRoute
   '/leaderboard': typeof LeaderboardIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/resource': typeof ResourceIndexRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/leaderboard/$slug': typeof LeaderboardSlugRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/resource/$slug': typeof ResourceSlugRoute
+  '/events': typeof EventsIndexRoute
   '/leaderboard': typeof LeaderboardIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/resource': typeof ResourceIndexRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/leaderboard/$slug': typeof LeaderboardSlugRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/resource/$slug': typeof ResourceSlugRoute
+  '/events/': typeof EventsIndexRoute
   '/leaderboard/': typeof LeaderboardIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/resource/': typeof ResourceIndexRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/leaderboard/$slug'
     | '/profile/$slug'
     | '/resource/$slug'
+    | '/events'
     | '/leaderboard'
     | '/profile'
     | '/resource'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/leaderboard/$slug'
     | '/profile/$slug'
     | '/resource/$slug'
+    | '/events'
     | '/leaderboard'
     | '/profile'
     | '/resource'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/leaderboard/$slug'
     | '/profile/$slug'
     | '/resource/$slug'
+    | '/events/'
     | '/leaderboard/'
     | '/profile/'
     | '/resource/'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   LeaderboardSlugRoute: typeof LeaderboardSlugRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
   ResourceSlugRoute: typeof ResourceSlugRoute
+  EventsIndexRoute: typeof EventsIndexRoute
   LeaderboardIndexRoute: typeof LeaderboardIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   ResourceIndexRoute: typeof ResourceIndexRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeaderboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resource/$slug': {
       id: '/resource/$slug'
       path: '/resource/$slug'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardSlugRoute: LeaderboardSlugRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   ResourceSlugRoute: ResourceSlugRoute,
+  EventsIndexRoute: EventsIndexRoute,
   LeaderboardIndexRoute: LeaderboardIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   ResourceIndexRoute: ResourceIndexRoute,
