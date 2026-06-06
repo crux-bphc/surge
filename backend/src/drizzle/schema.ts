@@ -3,6 +3,7 @@ import {
   timestamp,
   text,
   integer,
+  index,
   uniqueIndex,
   serial,
   date,
@@ -10,6 +11,7 @@ import {
   pgEnum,
   bigint,
   real,
+  foreignKey
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
@@ -180,7 +182,7 @@ export const campusContestStatusEnum = pgEnum("campus_contest_status", [
 
 export const campusContests = pgTable("campus_contests", {
   id: serial("id").primaryKey(),
-  startTime: timestamp("start_time", { precision: 0, mode: "string" }).notNull(),
+  startTime: timestamp("start_time", { precision: 3, mode: "string" }).notNull(),
   durationMinutes: integer("duration_minutes").notNull(),
   cfContestId: integer("cf_contest_id"),
   status: campusContestStatusEnum("status").notNull().default("scheduled"),
@@ -190,18 +192,27 @@ export const campusContests = pgTable("campus_contests", {
     .notNull(),
 });
 
-export const campusGroups = pgTable(
-  "campus_groups",
+export const campusGroups = pgTable("campus_groups", {
+  id: serial("id").primaryKey(),
+  groupName: text("group_name").notNull().unique(),
+});
+
+export const campusContestGroups = pgTable(
+  "campus_contest_groups",
   {
     id: serial("id").primaryKey(),
-    groupName: text("group_name").notNull(),
     contestId: integer("contest_id")
       .notNull()
       .references(() => campusContests.id, { onDelete: "cascade" }),
+    groupId: integer("group_id")
+      .notNull()
+      .references(() => campusGroups.id, { onDelete: "cascade" }),
     contestGroupScore: integer("contest_group_score").notNull().default(0),
   },
   (table) => [
-    uniqueIndex("campus_groups_contest_group_name").on(table.contestId, table.groupName),
+    uniqueIndex("campus_contest_groups_contest_group").on(table.contestId, table.groupId),
+    index("campus_contest_groups_contest_idx").on(table.contestId),
+    index("campus_contest_groups_group_idx").on(table.groupId),
   ]
 );
 
@@ -209,22 +220,17 @@ export const campusContestParticipants = pgTable(
   "campus_contest_participants",
   {
     id: serial("id").primaryKey(),
-    contestId: integer("contest_id")
+    contestGroupId: integer("contest_group_id")
       .notNull()
-      .references(() => campusContests.id, { onDelete: "cascade" }),
+      .references(() => campusContestGroups.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => users.id),
     contestParticipantScore: integer("contest_participant_score").notNull().default(0),
-    groupId: integer("group_id")
-      .notNull()
-      .references(() => campusGroups.id, { onDelete: "cascade" }),
   },
   (table) => [
-    uniqueIndex("campus_contest_participants_contest_user").on(
-      table.contestId,
-      table.userId
-    ),
+    uniqueIndex("campus_contest_participants_group_user").on(table.contestGroupId, table.userId),
+    index("campus_contest_participants_group_idx").on(table.contestGroupId),
   ]
 );
 
@@ -235,9 +241,9 @@ export const campusContestSolves = pgTable(
     participantId: integer("participant_id")
       .notNull()
       .references(() => campusContestParticipants.id, { onDelete: "cascade" }),
-    contestId: integer("contest_id")
+    contestGroupId: integer("contest_group_id")
       .notNull()
-      .references(() => campusContests.id, { onDelete: "cascade" }),
+      .references(() => campusContestGroups.id, { onDelete: "cascade" }),
     problemId: text("problem_id").notNull(),
     solvedAt: timestamp("solved_at", { precision: 3, mode: "string" })
       .defaultNow()
@@ -248,5 +254,12 @@ export const campusContestSolves = pgTable(
       table.participantId,
       table.problemId
     ),
-  ]
+
+    foreignKey({
+      columns: [table.participantId, table.contestGroupId],
+      foreignColumns: [campusContestParticipants.id, campusContestParticipants.contestGroupId],
+    }).onDelete("cascade"),
+    //Above foreign key is used so that if by chance the contestGroupId and participantId don't match(if the participant is not under the same group pointed by groupId due to some backend error), then instead of it just going through it outputs an error. Basically for safety.
+    index("campus_contest_solves_contest_group_idx").on(table.contestGroupId),
+    index("campus_contest_solves_participant_idx").on(table.participantId),]
 );
