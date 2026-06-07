@@ -1,14 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
+import EventCard from "../../components/EventCard";
 import ProfileHeader from "../../components/ProfileHeader";
-import UpcomingContests from "../../components/UpcomingContests";
 import { useAuth } from "../../context/AuthContext";
+import LoadingIndicator from "../../components/LoadingIndicator";
 
 export const Route = createFileRoute("/events/")({
   component: RouteComponent,
 });
 
+const events = [
+  {
+    title: "Summer of CC",
+    subtitle: "CC Masti",
+    slug: "socc",
+  },
+];
+
 function RouteComponent() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) return <LoadingIndicator />;
 
   return (
     <div className="max-w-7xl m-auto">
@@ -16,9 +27,8 @@ function RouteComponent() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">
-              Upcoming <span className="text-highlight-lighter">Events</span>
+              Ongoing <span className="text-highlight-lighter">Events</span>
             </h1>
-            <div className="text-muted text-sm">Blah Blah</div>
           </div>
           <ProfileHeader
             cfRating={user?.cfRating || undefined}
@@ -26,7 +36,17 @@ function RouteComponent() {
           />
         </div>
       </div>
-      <UpcomingContests />
+
+      <div className="space-y-6">
+        {events.map((event) => (
+          <EventCard
+            key={event.title}
+            title={event.title}
+            subtitle={event.subtitle}
+            slug={event.slug}
+          />
+        ))}
+      </div>
     </div>
   );
 }
