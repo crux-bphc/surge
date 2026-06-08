@@ -11,6 +11,7 @@ import profileRoutes from "./routes/profile";
 import contestRoutes from "./routes/contest";
 import potdRoutes from "./routes/potd";
 import wrappedRoutes from "./routes/wrapped";
+import eventRoutes from "./routes/event";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
 import { client, db } from "./drizzle/db";

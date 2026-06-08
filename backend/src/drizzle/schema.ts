@@ -174,6 +174,16 @@ export const wrapped25 = pgTable("wrapped_25", {
   batchRank: integer("batch_rank").notNull(),
 });
 
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at", { precision: 3, mode: "string" })
+    .defaultNow()
+    .notNull(),
+});
+
+
 export const campusContestStatusEnum = pgEnum("campus_contest_status", [
   "scheduled",
   "live",
@@ -182,6 +192,7 @@ export const campusContestStatusEnum = pgEnum("campus_contest_status", [
 
 export const campusContests = pgTable("campus_contests", {
   id: serial("id").primaryKey(),
+  eventId: integer("event_id").references(() => events.id, { onDelete: "cascade" }),
   startTime: timestamp("start_time", { precision: 3, mode: "string" }).notNull(),
   durationMinutes: integer("duration_minutes").notNull(),
   cfContestId: integer("cf_contest_id"),
