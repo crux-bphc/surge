@@ -177,100 +177,56 @@ export const wrapped25 = pgTable("wrapped_25", {
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  description: text("description"),
-  createdAt: timestamp("created_at", { precision: 3, mode: "string" })
-    .defaultNow()
-    .notNull(),
+  desc: text("desc"),
+  createdAt: timestamp("created_at", { precision: 3, mode: "string" }).defaultNow().notNull(),
 });
 
-
-export const campusContestStatusEnum = pgEnum("campus_contest_status", [
-  "scheduled",
-  "live",
-  "ended",
-]);
-
-export const campusContests = pgTable("campus_contests", {
-  id: serial("id").primaryKey(),
-  eventId: integer("event_id").references(() => events.id, { onDelete: "cascade" }),
+export const eventContests = pgTable("event_contests", {
+  id: integer("id").primaryKey(), // cf contestid
+  name: text("name").notNull(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
   startTime: timestamp("start_time", { precision: 3, mode: "string" }).notNull(),
   durationMinutes: integer("duration_minutes").notNull(),
-  cfContestId: integer("cf_contest_id"),
-  status: campusContestStatusEnum("status").notNull().default("scheduled"),
-  lastSyncedAt: timestamp("last_synced_at", { precision: 3, mode: "string" }),
-  createdAt: timestamp("created_at", { precision: 3, mode: "string" })
-    .defaultNow()
-    .notNull(),
+  createdAt: timestamp("created_at", { precision: 3, mode: "string" }).defaultNow().notNull(),
 });
 
-export const campusGroups = pgTable("campus_groups", {
+export const eventGroups = pgTable("event_groups", {
   id: serial("id").primaryKey(),
-  groupName: text("group_name").notNull().unique(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  groupScore: integer("group_score").notNull().default(0),
+  name: text("name").notNull(),
 });
 
-export const campusContestGroups = pgTable(
-  "campus_contest_groups",
+export const eventParticipants = pgTable(
+  "event_participants",
   {
     id: serial("id").primaryKey(),
-    contestId: integer("contest_id")
-      .notNull()
-      .references(() => campusContests.id, { onDelete: "cascade" }),
-    groupId: integer("group_id")
-      .notNull()
-      .references(() => campusGroups.id, { onDelete: "cascade" }),
-    contestGroupScore: integer("contest_group_score").notNull().default(0),
+    groupId: integer("group_id").references(() => eventGroups.id, {onDelete: "set null",}),
+    userId: text("user_id").notNull().references(() => users.id),
+    eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+    participantScore: integer("participant_score").notNull().default(0),
   },
   (table) => [
-    uniqueIndex("campus_contest_groups_contest_group").on(table.contestId, table.groupId),
-    index("campus_contest_groups_contest_idx").on(table.contestId),
-    index("campus_contest_groups_group_idx").on(table.groupId),
-  ]
-);
-
-export const campusContestParticipants = pgTable(
-  "campus_contest_participants",
-  {
-    id: serial("id").primaryKey(),
-    contestGroupId: integer("contest_group_id")
-      .notNull()
-      .references(() => campusContestGroups.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id),
-    contestParticipantScore: integer("contest_participant_score").notNull().default(0),
-  },
-  (table) => [
-    uniqueIndex("campus_contest_participants_group_user").on(table.contestGroupId, table.userId),
-    index("campus_contest_participants_group_idx").on(table.contestGroupId),
-  ]
-);
-
-export const campusContestSolves = pgTable(
-  "campus_contest_solves",
-  {
-    id: serial("id").primaryKey(),
-    participantId: integer("participant_id")
-      .notNull()
-      .references(() => campusContestParticipants.id, { onDelete: "cascade" }),
-    contestGroupId: integer("contest_group_id")
-      .notNull()
-      .references(() => campusContestGroups.id, { onDelete: "cascade" }),
-    problemId: text("problem_id").notNull(),
-    solvedAt: timestamp("solved_at", { precision: 3, mode: "string" })
-      .defaultNow()
-      .notNull(),
-  },
-  (table) => [
-    uniqueIndex("campus_contest_solves_participant_problem").on(
-      table.participantId,
-      table.problemId
+    uniqueIndex("event_participant_unique").on(
+      table.userId,
+      table.eventId
     ),
-
-    foreignKey({
-      columns: [table.participantId, table.contestGroupId],
-      foreignColumns: [campusContestParticipants.id, campusContestParticipants.contestGroupId],
-    }).onDelete("cascade"),
-    //Above foreign key is used so that if by chance the contestGroupId and participantId don't match(if the participant is not under the same group pointed by groupId due to some backend error), then instead of it just going through it outputs an error. Basically for safety.
-    index("campus_contest_solves_contest_group_idx").on(table.contestGroupId),
-    index("campus_contest_solves_participant_idx").on(table.participantId),]
+  ]
 );
+
+export const eventContestsScore = pgTable(
+  "event_contests_score",
+  {
+    id: serial("id").primaryKey(),
+    participantId: integer("participant_id").notNull().references(() => eventParticipants.id, { onDelete: "cascade" }),
+    contestScore: integer("contest_score").notNull().default(0),
+    contestId: integer("contest_id").notNull().references(() => eventContests.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    uniqueIndex("event_contests_event_participant_unique").on(
+      table.participantId,
+      table.contestId
+    ),
+  ]
+);
+

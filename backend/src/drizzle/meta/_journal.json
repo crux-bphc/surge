@@ -19,15 +19,8 @@
     {
       "idx": 2,
       "version": "7",
-      "when": 1780721199457,
-      "tag": "0002_lonely_nuke",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1780851020664,
-      "tag": "0003_add_events_system",
+      "when": 1781094244694,
+      "tag": "0002_add_events_system",
       "breakpoints": true
     }
   ]
