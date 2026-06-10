@@ -144,6 +144,7 @@ app.use("/profile", profileRoutes);
 app.use("/contest", contestRoutes);
 app.use("/potd", potdRoutes);
 app.use("/wrapped", wrappedRoutes);
+app.use("/event", eventRoutes);
 const PORT = parseInt(process.env.BACKEND_PORT || "5000", 10);
 app.listen(PORT, "0.0.0.0", async () => {
   console.log(`Server running on port ${PORT}`);
