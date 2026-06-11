@@ -10,17 +10,8 @@ import { eq, sql } from "drizzle-orm";
 
 function getProblemWeight(index: string): number {
   const firstChar = index.charAt(0).toUpperCase();
-  const weights: Record<string, number> = {
-    A: 1,
-    B: 2,
-    C: 3,
-    D: 4,
-    E: 5,
-    F: 6,
-    G: 7,
-    H: 8,
-  };
-  return weights[firstChar] || 0;
+  const weight = firstChar.charCodeAt(0) - 64;
+  return weight > 0 ? weight : 0;
 }
 
 export async function syncEventLeaderboard(contestId: number) {
@@ -31,7 +22,7 @@ export async function syncEventLeaderboard(contestId: number) {
   }
 
   // standings
-  const cfRes = await fetch(`https://codeforces.com/api/contest.standings?contestId=${contest.id}&from=1&showUnofficial=false`);
+  const cfRes = await fetch(`https://codeforces.com/api/contest.standings?contestId=${contest.id}&from=1&showUnofficial=false&asManager=true`);
   const data = await cfRes.json();
 
   if (data.status !== "OK") {
@@ -78,35 +69,36 @@ export async function syncEventLeaderboard(contestId: number) {
     }
   }
 
-  if (scoresToInsert.length > 0) {
-    await db
-      .insert(eventContestsScore)
-      .values(scoresToInsert)
-      .onConflictDoUpdate({
-        target: [eventContestsScore.participantId, eventContestsScore.contestId],
-        set: { contestScore: sql`excluded.contest_score` },
-      });
-  }
+  await db.transaction(async (tx) => {   // helps w data consistency, if one fails it goes back to prev state
+    // drop earlier scores so contest can handle banned/moved users
+    await tx
+      .delete(eventContestsScore)
+      .where(eq(eventContestsScore.contestId, contestId));
 
-  // upd participant scores for event
-  await db.execute(sql`
-    UPDATE event_participants
-    SET participant_score = (
-      SELECT COALESCE(SUM(contest_score), 0)
-      FROM event_contests_score
-      WHERE event_contests_score.participant_id = event_participants.id
-    )
-    WHERE event_participants.event_id = ${contest.eventId}
-  `);
+    if (scoresToInsert.length > 0) {
+      await tx.insert(eventContestsScore).values(scoresToInsert);
+    }
 
-  // upd group scores for event
-  await db.execute(sql`
-    UPDATE event_groups
-    SET group_score = (
-      SELECT COALESCE(SUM(participant_score), 0)
-      FROM event_participants
-      WHERE event_participants.group_id = event_groups.id
-    )
-    WHERE event_groups.event_id = ${contest.eventId}
-  `);
+    // 1. Update participant scores
+    await tx.execute(sql`
+      UPDATE event_participants
+      SET participant_score = (
+        SELECT COALESCE(SUM(contest_score), 0)
+        FROM event_contests_score
+        WHERE event_contests_score.participant_id = event_participants.id
+      )
+      WHERE event_participants.event_id = ${contest.eventId}
+    `);
+
+    // 2. Update group scores based on the new participant scores
+    await tx.execute(sql`
+      UPDATE event_groups
+      SET group_score = (
+        SELECT COALESCE(SUM(participant_score), 0)
+        FROM event_participants
+        WHERE event_participants.group_id = event_groups.id
+      )
+      WHERE event_groups.event_id = ${contest.eventId}
+    `);
+  });
 }

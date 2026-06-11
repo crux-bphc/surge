@@ -10,6 +10,7 @@ import {
 } from "../drizzle/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { codeforcesQueue } from "../queues/codeforcesQueue";
+import { addWithRetry } from "../utils/queueHelpers";
 import { requireCruxMember } from "../middlewares/auth";
 
 const router = Router();
@@ -125,7 +126,7 @@ router.get("/:id/leaderboard", async (req, res) => {
       })
       .from(eventParticipants)
       .innerJoin(users, eq(eventParticipants.userId, users.id))
-      .leftJoin(eventGroups, eq(eventParticipants.groupId, eventGroups.id)) // incaes someones not in a group. lucky(?)
+      .leftJoin(eventGroups, eq(eventParticipants.groupId, eventGroups.id))  // incaes someones not in a group. lucky(?)
       .where(eq(eventParticipants.eventId, eventId))
       .orderBy(desc(eventParticipants.participantScore));
     res.status(200).json(results);
@@ -258,7 +259,7 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
       .innerJoin(eventContestsScore, eq(eventParticipants.id, eventContestsScore.participantId))
       // if usre isnt in a group it still sohws them. 
       // this is useless unless we show groups in the global leaderboard 
-      // so if we arent doing that we can just remove these left joins
+      // so if we arent doing that we can just remove these left joins      
       .leftJoin(eventGroups, eq(eventParticipants.groupId, eventGroups.id))
       .where(eq(eventContestsScore.contestId, contestId))
       .orderBy(desc(eventContestsScore.contestScore));
@@ -272,34 +273,28 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
 // sync leaderboard for contest
 router.post(
   "/contest/:contestId/sync",
-  requireCruxMember,
-  async (req, res) => {
-    const contestId = parseInt(req.params.contestId);
-    if (isNaN(contestId)) {
-      res.status(400).json({ message: "invalid id" });
+   requireCruxMember,
+   async (req, res) => {
+  const contestId = parseInt(req.params.contestId);
+  if (isNaN(contestId)) {
+    res.status(400).json({ message: "invalid id" });
+    return;
+  }
+
+  try {
+    const [contest] = await db.select().from(eventContests).where(eq(eventContests.id, contestId)).limit(1);
+
+    if (!contest) {
+      res.status(404).json({ message: "contest not found" });
       return;
     }
-
-    try {
-      const [contest] = await db.select().from(eventContests).where(eq(eventContests.id, contestId)).limit(1);
-
-      if (!contest) {
-        res.status(404).json({ message: "contest not found" });
-        return;
-      }
-
-      await codeforcesQueue.add(
-        "cf-api",
-        { type: "event.sync", contestId },
-        { removeOnComplete: true }
-      );
-
-      res.status(200).json({ message: "sync job is queued" });
-    } catch (err) {
-      console.error(`error: ${err}`);
-      res.status(500).json({ message: "server error" });
-    }
+    await addWithRetry(codeforcesQueue, "cf-api", { type: "event.sync", contestId });
+    res.status(200).json({ message: "sync job is queued" });
+  } catch (err) {
+    console.error(`error: ${err}`);
+    res.status(500).json({ message: "server error" });
   }
+}
 );
 
 export default router;
