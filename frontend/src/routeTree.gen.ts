@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WrappedRouteImport } from './routes/wrapped'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as PotdRouteImport } from './routes/potd'
+import { Route as EventsRouteImport } from './routes/events'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResourceIndexRouteImport } from './routes/resource/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile/index'
@@ -33,6 +34,11 @@ const StatsRoute = StatsRouteImport.update({
 const PotdRoute = PotdRouteImport.update({
   id: '/potd',
   path: '/potd',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -73,6 +79,7 @@ const LeaderboardSlugRoute = LeaderboardSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/events': typeof EventsRoute
   '/potd': typeof PotdRoute
   '/stats': typeof StatsRoute
   '/wrapped': typeof WrappedRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/events': typeof EventsRoute
   '/potd': typeof PotdRoute
   '/stats': typeof StatsRoute
   '/wrapped': typeof WrappedRoute
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/events': typeof EventsRoute
   '/potd': typeof PotdRoute
   '/stats': typeof StatsRoute
   '/wrapped': typeof WrappedRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/events'
     | '/potd'
     | '/stats'
     | '/wrapped'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/events'
     | '/potd'
     | '/stats'
     | '/wrapped'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/events'
     | '/potd'
     | '/stats'
     | '/wrapped'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EventsRoute: typeof EventsRoute
   PotdRoute: typeof PotdRoute
   StatsRoute: typeof StatsRoute
   WrappedRoute: typeof WrappedRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/potd'
       fullPath: '/potd'
       preLoaderRoute: typeof PotdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -237,6 +257,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EventsRoute: EventsRoute,
   PotdRoute: PotdRoute,
   StatsRoute: StatsRoute,
   WrappedRoute: WrappedRoute,
