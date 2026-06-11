@@ -16,19 +16,26 @@ const LEVEL_OPTIONS = [
 
 type LeaderboardHeaderProps = {
   batches: string[];
+  groups?: string[];
   leaderboard: Leaderboard[];
-  path: "/leaderboard/" | "/leaderboard/$slug";
+  path: "/leaderboard/" | "/leaderboard/$slug" | "/events/$slug" | "/events/";
+  title?: string;
+  titleHighlight?: string;
 };
 
 export default function LeaderboardHeader({
   batches,
+  groups,
   leaderboard,
   path,
-}: LeaderboardHeaderProps) {
+  title = "Campus",
+  titleHighlight = "Leaderboard",
+  hideTitle = false,
+}: LeaderboardHeaderProps & { hideTitle?: boolean }) {
   const [input, setInput] = useState("");
   const [filteredNames, setFilteredNames] = useState<Leaderboard[]>([]);
 
-  const { batch, level } = useSearch({ from: path });
+  const { batch, level, group } = useSearch({ from: path }) as any;
 
   const searchRef = useClickAway<HTMLDivElement>(() => {
     setFilteredNames([]);
@@ -51,11 +58,13 @@ export default function LeaderboardHeader({
   return (
     <div className="border-b border-[#25293E]">
       <div className="pb-4">
-        <div className="mb-7">
-          <h1 className="text-3xl font-bold">
-            Campus <span className="text-highlight-lighter">Leaderboard</span>
-          </h1>
-        </div>
+        {!hideTitle && (
+          <div className="mb-7">
+            <h1 className="text-3xl font-bold">
+              {title} <span className="text-highlight-lighter">{titleHighlight}</span>
+            </h1>
+          </div>
+        )}
         <div className="flex flex-col justify-between md:flex-row">
           {/* Search Input and Results */}
           <div
@@ -97,12 +106,21 @@ export default function LeaderboardHeader({
               placeholder="Filter by Batch"
               field="batch"
             />
-            <Dropdown
-              options={LEVEL_OPTIONS}
-              selectedValue={level}
-              placeholder="Filter by Level"
-              field="level"
-            />
+            {groups ? (
+              <Dropdown
+                options={groups}
+                selectedValue={group}
+                placeholder="Filter by Group"
+                field="group"
+              />
+            ) : (
+              <Dropdown
+                options={LEVEL_OPTIONS}
+                selectedValue={level}
+                placeholder="Filter by Level"
+                field="level"
+              />
+            )}
           </div>
         </div>
       </div>
