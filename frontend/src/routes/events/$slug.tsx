@@ -16,6 +16,7 @@ export const Route = createFileRoute("/events/$slug")({
     return {
       batch: typeof search.batch === "string" ? search.batch : undefined,
       group: typeof search.group === "string" ? search.group : undefined,
+      view: typeof search.view === "string" ? search.view : undefined,
     };
   },
 });
@@ -39,7 +40,7 @@ type UserRatingChange = {
   newRating: number;
 };
 
-const MOCK_CONTEST_DATA: Record<string, any[]> = {
+const mockData: Record<string, any[]> = {
   "1": [
     {
       id: "u1",
@@ -48,7 +49,7 @@ const MOCK_CONTEST_DATA: Record<string, any[]> = {
       pfpUrl: "",
       batch: "2024",
       cfRating: 2000,
-      points: 500,
+      score: 500,
       groupName: "A",
     },
     {
@@ -58,7 +59,7 @@ const MOCK_CONTEST_DATA: Record<string, any[]> = {
       pfpUrl: "",
       batch: "2024",
       cfRating: 2000,
-      points: 500,
+      score: 500,
       groupName: "B",
     },
     {
@@ -68,7 +69,7 @@ const MOCK_CONTEST_DATA: Record<string, any[]> = {
       pfpUrl: "",
       batch: "2024",
       cfRating: 2000,
-      points: 500,
+      score: 500,
       groupName: "C",
     },
     {
@@ -78,8 +79,18 @@ const MOCK_CONTEST_DATA: Record<string, any[]> = {
       pfpUrl: "",
       batch: "2024",
       cfRating: 2000,
-      points: 500,
+      score: 500,
       groupName: "D",
+    },
+    {
+      id: "u5",
+      name: "Proteus",
+      cfHandle: "Proteus26",
+      pfpUrl: "",
+      batch: "2024",
+      cfRating: 50,
+      score: 200,
+      groupName: "A",
     },
   ],
   "2": [
@@ -90,7 +101,7 @@ const MOCK_CONTEST_DATA: Record<string, any[]> = {
       pfpUrl: "",
       batch: "2024",
       cfRating: 2000,
-      points: 500,
+      score: 500,
       groupName: "A",
     },
     {
@@ -100,7 +111,7 @@ const MOCK_CONTEST_DATA: Record<string, any[]> = {
       pfpUrl: "",
       batch: "2024",
       cfRating: 2000,
-      points: 500,
+      score: 500,
       groupName: "B",
     },
     {
@@ -110,7 +121,7 @@ const MOCK_CONTEST_DATA: Record<string, any[]> = {
       pfpUrl: "",
       batch: "2024",
       cfRating: 2000,
-      points: 500,
+      score: 500,
       groupName: "C",
     },
     {
@@ -120,8 +131,38 @@ const MOCK_CONTEST_DATA: Record<string, any[]> = {
       pfpUrl: "",
       batch: "2024",
       cfRating: 2000,
-      points: 500,
+      score: 500,
       groupName: "D",
+    },
+    {
+      id: "u5",
+      name: "Proteus",
+      cfHandle: "Proteus26",
+      pfpUrl: "",
+      batch: "2024",
+      cfRating: 50,
+      score: 200,
+      groupName: "A",
+    },
+    {
+      id: "u6",
+      name: "Proteus1",
+      cfHandle: "Proteus261",
+      pfpUrl: "",
+      batch: "2024",
+      cfRating: 50,
+      score: 200,
+      groupName: "A",
+    },
+    {
+      id: "u7",
+      name: "Proteus2",
+      cfHandle: "Proteus262",
+      pfpUrl: "",
+      batch: "2024",
+      cfRating: 50,
+      score: 200,
+      groupName: "A",
     },
   ],
 };
@@ -136,7 +177,7 @@ function RouteComponent() {
   const [eventLeaderboard, setEventLeaderboard] = useState<Leaderboard[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
 
-  const { batch, group } = Route.useSearch();
+  const { view } = Route.useSearch();
 
   useEffect(() => {
     if (user?.cfHandle) {
@@ -182,7 +223,7 @@ function RouteComponent() {
         let contestResults = responses.map((res) => res.data);
 
         if (slug === "socc" && contestResults.every((r) => r.length === 0)) {
-          contestResults = contests.map((c) => MOCK_CONTEST_DATA[c.id] || []);
+          contestResults = contests.map((c) => mockData[c.id] || []);
         }
 
         const aggregation: Record<string, Leaderboard> = {};
@@ -192,20 +233,17 @@ function RouteComponent() {
             if (!aggregation[entry.cfHandle]) {
               aggregation[entry.cfHandle] = {
                 ...entry,
-                points: 0,
                 score: 0,
               };
             }
-            const p = entry.points || entry.score || 0;
-            aggregation[entry.cfHandle].points =
-              (aggregation[entry.cfHandle].points || 0) + p;
+            const s = entry.score || entry.points || 0;
             aggregation[entry.cfHandle].score =
-              (aggregation[entry.cfHandle].score || 0) + p;
+              (aggregation[entry.cfHandle].score || 0) + s;
           });
         });
 
         const sortedLeaderboard = Object.values(aggregation).sort(
-          (a, b) => (b.points || 0) - (a.points || 0)
+          (a, b) => (b.score || 0) - (a.score || 0)
         );
         setEventLeaderboard(sortedLeaderboard);
       } catch (err) {
@@ -218,11 +256,37 @@ function RouteComponent() {
     fetchLeaderboard();
   }, [slug]);
 
+  const currentUserGroup = useMemo(() => {
+    if (!user || !eventLeaderboard.length) return null;
+    const userEntry = eventLeaderboard.find(
+      (e) => e.id === user.id || e.cfHandle === user.cfHandle
+    );
+    return userEntry?.groupName || null;
+  }, [user, eventLeaderboard]);
+
   const filteredLeaderboard = useMemo(() => {
-    return eventLeaderboard
-      .filter((entry) => !batch || entry.batch === batch)
-      .filter((entry) => !group || entry.groupName === group);
-  }, [batch, group, eventLeaderboard]);
+    if (view === "My Group") {
+      return eventLeaderboard.filter(
+        (entry) => entry.groupName === currentUserGroup
+      );
+    }
+    return eventLeaderboard;
+  }, [view, eventLeaderboard, currentUserGroup]);
+
+  const groupRankings = useMemo(() => {
+    if (view !== "Group Wise") return [];
+    const aggregation: Record<
+      string,
+      { name: string; score: number; count: number }
+    > = {};
+    eventLeaderboard.forEach((entry) => {
+      const g = entry.groupName || "N/A";
+      if (!aggregation[g]) aggregation[g] = { name: g, score: 0, count: 0 };
+      aggregation[g].score += entry.score || 0;
+      aggregation[g].count += 1;
+    });
+    return Object.values(aggregation).sort((a, b) => b.score - a.score);
+  }, [view, eventLeaderboard]);
 
   const batches = [
     ...new Set<string>(eventLeaderboard.map((user) => user.batch)),
@@ -265,9 +329,16 @@ function RouteComponent() {
 
       {contests.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-white text-xl mb-6">
-            Event <span className="text-highlight-lighter">contests</span>
-          </h2>
+          <LeaderboardHeader
+            batches={[]}
+            leaderboard={[]}
+            path="/events/$slug"
+            title="Event"
+            titleHighlight="contests"
+            hideSearch={true}
+            hideFilters={true}
+            variant="small"
+          />
           <div className="flex flex-wrap gap-6">
             {contests.map((c, i) => (
               <ContestCard
@@ -289,12 +360,34 @@ function RouteComponent() {
           groups={groups}
           leaderboard={filteredLeaderboard}
           path="/events/$slug"
-          hideTitle={true}
+          title="Events"
+          titleHighlight="Leaderboard"
+          hideSearch={true}
+          variant="small"
         />
 
         {loadingLeaderboard ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-highlight-lighter"></div>
+          </div>
+        ) : view === "Group Wise" ? (
+          <div className="flex flex-col mt-8">
+            {groupRankings.map((group, index) => (
+              <div
+                key={group.name}
+                className="h-16 rounded-xl flex justify-start mb-4 items-center bg-[#25293E] text-white"
+              >
+                <div className="w-8 md:w-16 ml-4 md:m-4 text-base flex justify-center items-center">
+                  {index + 1}
+                </div>
+                <div className="h-full flex-1 flex items-center text-sm md:text-base font-bold">
+                  {group.name}
+                </div>
+                <div className="w-20 md:w-32 text-sm text-center md:text-base flex justify-center items-center font-bold mr-4">
+                  {group.score} pts
+                </div>
+              </div>
+            ))}
           </div>
         ) : eventLeaderboard.length > 0 ? (
           <div className="flex flex-col">
@@ -331,9 +424,7 @@ function RouteComponent() {
                       {filteredLeaderboard[1].batch || "N/A"}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center font-bold">
-                      {filteredLeaderboard[1].points ||
-                        filteredLeaderboard[1].score ||
-                        0}
+                      {filteredLeaderboard[1].score || 0}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center">
                       {filteredLeaderboard[1].groupName ||
@@ -370,9 +461,7 @@ function RouteComponent() {
                       {filteredLeaderboard[0].batch || "N/A"}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center font-bold">
-                      {filteredLeaderboard[0].points ||
-                        filteredLeaderboard[0].score ||
-                        0}
+                      {filteredLeaderboard[0].score || 0}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center">
                       {filteredLeaderboard[0].groupName ||
@@ -412,9 +501,7 @@ function RouteComponent() {
                       {filteredLeaderboard[2].batch || "N/A"}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center font-bold">
-                      {filteredLeaderboard[2].points ||
-                        filteredLeaderboard[2].score ||
-                        0}
+                      {filteredLeaderboard[2].score || 0}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center">
                       {filteredLeaderboard[2].groupName ||
@@ -460,7 +547,7 @@ function RouteComponent() {
                         {entry.batch || "N/A"}
                       </div>
                       <div className="w-20 md:w-32 text-sm text-center md:text-base flex justify-center items-center font-bold">
-                        {entry.points || entry.score || 0}
+                        {entry.score || 0}
                       </div>
                       <div className="hidden md:flex w-32 text-sm text-center md:text-base justify-center items-center pr-2">
                         {entry.groupName || getRatingLevel(entry.cfRating)}

@@ -3,17 +3,9 @@ import EventCard from "../../components/EventCard";
 import ProfileHeader from "../../components/ProfileHeader";
 import { useAuth } from "../../context/AuthContext";
 import LoadingIndicator from "../../components/LoadingIndicator";
-import LeaderboardHeader from "../../components/LeaderboardHeader";
-import { useMemo } from "react";
 
 export const Route = createFileRoute("/events/")({
   component: RouteComponent,
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      batch: typeof search.batch === "string" ? search.batch : undefined,
-      group: typeof search.group === "string" ? search.group : undefined,
-    };
-  },
 });
 
 const events = [
@@ -26,11 +18,6 @@ const events = [
 
 function RouteComponent() {
   const { user, loading } = useAuth();
-  const { batch, group } = Route.useSearch();
-
-  const filteredEvents = useMemo(() => {
-    return events; // Filtering logic can be added here if events had batch/group data
-  }, [batch, group]);
 
   if (loading) return <LoadingIndicator />;
 
@@ -50,18 +37,8 @@ function RouteComponent() {
         </div>
       </div>
 
-      <div className="mb-10">
-        <LeaderboardHeader
-          batches={["2025", "2024", "2023", "2022"]}
-          groups={[]}
-          leaderboard={[]}
-          path="/events/"
-          hideTitle={true}
-        />
-      </div>
-
       <div className="space-y-6">
-        {filteredEvents.map((event) => (
+        {events.map((event) => (
           <EventCard
             key={event.title}
             title={event.title}
