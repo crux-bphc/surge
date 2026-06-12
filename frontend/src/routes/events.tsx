@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { 
-  Plus, Trash2, Pencil, X, Users, UserPlus, Trophy, Mail, CheckCircle, Save, History, RefreshCw 
+  Plus, Trash2, Pencil, X, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw, House
 } from 'lucide-react';
+
+const emailRegex = /^f\d{8}@hyderabad\.bits-pilani\.ac\.in$/;
 
 interface Group {
   id: string;
@@ -30,8 +32,8 @@ function AdminEventsComponent() {
   const [isGlobalSaving, setIsGlobalSaving] = useState(false);
 
   const [groups, setGroups] = useState<Group[]>([
-    { id: '1', name: 'Alpha Coders', members: ['alex@college.edu', 'handle_blitz', 'code_wizard@gmail.com'] },
-    { id: '2', name: 'Binary Bosses', members: ['sam_99', 'byte_me@college.edu', 'coder_x', 'algo_pro', 'dev_dan'] }
+    { id: '1', name: 'Cros', members: ['f20251284@hyderabad.bits-pilani.ac.in', 'f20230008@hyderabad.bits-pilani.ac.in', 'f20250132@hyderabad.bits-pilani.ac.in'] },
+    { id: '2', name: 'Fros', members: ['f20251120@hyderabad.bits-pilani.ac.in', 'f20250084@hyderabad.bits-pilani.ac.in', 'f20250044@hyderabad.bits-pilani.ac.in', 'f20241084@hyderabad.bits-pilani.ac.in', 'f20230034@hyderabad.bits-pilani.ac.in'] }
   ]);
   
   const [newGroupName, setNewGroupName] = useState('');
@@ -40,6 +42,7 @@ function AdminEventsComponent() {
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   
   const [groupToDelete, setGroupToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [contestToDelete, setContestToDelete] = useState<{ contestId: string; name: string } | null>(null);
 
   const [pastContests, setPastContests] = useState<PastContest[]>([
     { contestId: '1089', name: 'Contest #3', date: '2026-06-01', duration: '2h 00m' },
@@ -76,10 +79,11 @@ function AdminEventsComponent() {
   const handleAddMemberToDraft = (e: React.FormEvent) => {
     e.preventDefault();
     const email = currentUserEmail.trim();
-    if (email && !currentGroupMembers.includes(email)) {
+
+    if (email && emailRegex.test(email) && !currentGroupMembers.includes(email)) {
       setCurrentGroupMembers([...currentGroupMembers, email]);
+      setCurrentUserEmail('');
     }
-    setCurrentUserEmail('');
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -110,11 +114,17 @@ function AdminEventsComponent() {
     setCurrentGroupMembers([]);
   };
 
-  const confirmDelete = () => {
+  const confirmDeleteGroup = () => {
     if (!groupToDelete) return;
     if (editingGroupId === groupToDelete.id) handleCancelEdit();
     setGroups(groups.filter(g => g.id !== groupToDelete.id));
     setGroupToDelete(null);
+  };
+
+  const confirmDeleteContest = () => {
+    if (!contestToDelete) return;
+    setPastContests(pastContests.filter(c => c.contestId !== contestToDelete.contestId));
+    setContestToDelete(null);
   };
 
   return (
@@ -131,7 +141,7 @@ function AdminEventsComponent() {
           onClick={handleGlobalSavePortal}
           className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-5 rounded-lg flex items-center gap-2 transition-colors"
         >
-          {isGlobalSaving ? <><CheckCircle className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Settings</>}
+          {isGlobalSaving ? <><CheckCircle className="w-4 h-4" /> Saved</> : <><House className="w-4 h-4" /> Events Dashboard</>}
         </button>
       </div>
 
@@ -149,6 +159,7 @@ function AdminEventsComponent() {
                 <th className="py-3 px-4">Date</th>
                 <th className="py-3 px-4">Duration</th>
                 <th className="py-3 px-4 text-center">Actions</th>
+                <th className="py-3 px-4 text-center"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/50 text-slate-300">
@@ -159,8 +170,16 @@ function AdminEventsComponent() {
                   <td className="py-3 px-4">{contest.date}</td>
                   <td className="py-3 px-4 text-slate-400">{contest.duration}</td>
                   <td className="py-3 px-4 text-center">
-                    <button className="bg-emerald-600 hover:bg-emerald-500 text-white py-1.5 px-3 rounded flex items-center gap-1.5 mx-auto text-xs transition-colors">
+                    <button className="bg-emerald-600 hover:bg-emerald-500 text-white py-1.5 px-3 rounded flex items-center gap-1.5 text-xs transition-colors mx-auto">
                       <RefreshCw className="w-3.5 h-3.5" /> Refresh Leaderboard
+                    </button>
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <button 
+                      onClick={() => setContestToDelete({ contestId: contest.contestId, name: contest.name })}
+                      className="text-slate-400 hover:text-rose-400 p-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>
@@ -172,12 +191,6 @@ function AdminEventsComponent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
-            <span className="text-xs text-slate-400 uppercase tracking-wider block mb-2">Active Contest ID</span>
-            <span className="text-3xl font-mono font-black text-white bg-slate-900 px-3 py-1 rounded-lg border border-slate-700">
-              {liveContestId}
-            </span>
-          </div>
 
           <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
             <h2 className="text-lg font-semibold text-white mb-3">Deploy New Contest</h2>
@@ -191,10 +204,11 @@ function AdminEventsComponent() {
               />
               <button
                 type="submit"
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors"
+                disabled={!contestId.trim()}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isContestSaved ? <><CheckCircle className="w-4 h-4" /> Live</> : 'Push Contest'}
-              </button>
+              </button>           
             </form>
           </div>
 
@@ -221,9 +235,13 @@ function AdminEventsComponent() {
                       placeholder="Add user email"
                       value={currentUserEmail}
                       onChange={(e) => setCurrentUserEmail(e.target.value)}
-                      onKeyDown={(e) => { if(e.key === 'Enter') handleAddMemberToDraft(e); }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAddMemberToDraft(e);
+                        }
+                      }}
                       className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
-                    />
+                    />              
                   </div>
                   <button
                     type="button"
@@ -265,7 +283,7 @@ function AdminEventsComponent() {
 
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Users className="text-cyan-400 w-5 h-5" /> Active Groups ({groups.length})
+            <Users className="text-cyan-400 w-5 h-5" /> Groups ({groups.length})
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -309,7 +327,24 @@ function AdminEventsComponent() {
               <button onClick={() => setGroupToDelete(null)} className="px-4 py-2 rounded text-sm text-slate-300 hover:bg-slate-700 transition-colors">
                 Cancel
               </button>
-              <button onClick={confirmDelete} className="px-4 py-2 rounded text-sm bg-rose-600 hover:bg-rose-500 text-white transition-colors">
+              <button onClick={confirmDeleteGroup} className="px-4 py-2 rounded text-sm bg-rose-600 hover:bg-rose-500 text-white transition-colors">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {contestToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-sm w-full">
+            <h3 className="text-xl font-bold text-white mb-2">Delete Contest?</h3>
+            <p className="text-slate-300 mb-6 text-sm">This will permanently remove "{contestToDelete.name}".</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setContestToDelete(null)} className="px-4 py-2 rounded text-sm text-slate-300 hover:bg-slate-700 transition-colors">
+                Cancel
+              </button>
+              <button onClick={confirmDeleteContest} className="px-4 py-2 rounded text-sm bg-rose-600 hover:bg-rose-500 text-white transition-colors">
                 Delete
               </button>
             </div>

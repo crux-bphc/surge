@@ -3,6 +3,7 @@ import {
   timestamp,
   text,
   integer,
+  index,
   uniqueIndex,
   serial,
   date,
@@ -10,6 +11,7 @@ import {
   pgEnum,
   bigint,
   real,
+  foreignKey
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
@@ -170,4 +172,61 @@ export const wrapped25 = pgTable("wrapped_25", {
   potdSolves: integer("potd_solves"),
   campusRank: integer("campus_rank").notNull(),
   batchRank: integer("batch_rank").notNull(),
-})
+});
+
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  desc: text("desc"),
+  createdAt: timestamp("created_at", { precision: 3, mode: "string" }).defaultNow().notNull(),
+});
+
+export const eventContests = pgTable("event_contests", {
+  id: integer("id").primaryKey(), // cf contestid
+  name: text("name").notNull(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  startTime: timestamp("start_time", { precision: 3, mode: "string" }).notNull(),
+  durationMinutes: integer("duration_minutes").notNull(),
+  createdAt: timestamp("created_at", { precision: 3, mode: "string" }).defaultNow().notNull(),
+});
+
+export const eventGroups = pgTable("event_groups", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  groupScore: integer("group_score").notNull().default(0),
+  name: text("name").notNull(),
+});
+
+export const eventParticipants = pgTable(
+  "event_participants",
+  {
+    id: serial("id").primaryKey(),
+    groupId: integer("group_id").references(() => eventGroups.id, {onDelete: "set null",}),
+    userId: text("user_id").notNull().references(() => users.id),
+    eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+    participantScore: integer("participant_score").notNull().default(0),
+  },
+  (table) => [
+    uniqueIndex("event_participant_unique").on(
+      table.userId,
+      table.eventId
+    ),
+  ]
+);
+
+export const eventContestsScore = pgTable(
+  "event_contests_score",
+  {
+    id: serial("id").primaryKey(),
+    participantId: integer("participant_id").notNull().references(() => eventParticipants.id, { onDelete: "cascade" }),
+    contestScore: integer("contest_score").notNull().default(0),
+    contestId: integer("contest_id").notNull().references(() => eventContests.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    uniqueIndex("event_contests_event_participant_unique").on(
+      table.participantId,
+      table.contestId
+    ),
+  ]
+);
+

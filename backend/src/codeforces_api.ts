@@ -90,3 +90,36 @@ export async function linkCfHandle(cfHandle: string, userId: string) {
     throw new Error(err.message);
   }
 }
+
+export async function getContestDetails(contestId: number) {
+  try {
+    const res = await fetch(`https://codeforces.com/api/contest.list?gym=true`);
+    const data = await res.json();
+
+    if (data.status !== "OK") {
+      throw new Error("Codeforces contest list fetch failed.");
+    }
+
+    const targetContest = data.result.find(
+      (contest: any) => contest.id === contestId
+    );
+
+    if (!targetContest) {
+      throw new Error(`Contest with ID ${contestId} not found on Codeforces.`);
+    }
+
+    return {
+      id: targetContest.id,
+      name: targetContest.name,
+      
+      durationSeconds: targetContest.durationSeconds,
+      startTimeSeconds: targetContest.startTimeSeconds,
+      
+      startTimeFormatted: new Date(targetContest.startTimeSeconds * 1000).toISOString(),
+      durationMinutes: targetContest.durationSeconds / 60, 
+    };
+    
+  } catch (err: any) {
+    throw new Error(`getContestDetails failed: ${err.message}`);
+  }
+}
