@@ -8,19 +8,21 @@ import {
   eventContestsScore,
   users,
 } from "../drizzle/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { codeforcesQueue } from "../queues/codeforcesQueue";
+import { addWithRetry } from "../utils/queueHelpers";
 import { requireCruxMember } from "../middlewares/auth";
+import { getContestMetadata } from "../utils/eventHelpers";
 
 const router = Router();
 
-// list events
+// list events 
 router.get("/", async (req, res) => {
   try {
     const allEvents = await db.select().from(events).orderBy(desc(events.createdAt));
     res.status(200).json(allEvents);
   } catch (err) {
-    console.error(`error: ${err}`);
+    console.error('error: ${err}');
     res.status(500).json({ message: "server error" });
   }
 });
@@ -41,7 +43,7 @@ router.get("/:id", async (req, res) => {
     const contests = await db.select().from(eventContests).where(eq(eventContests.eventId, id));
     res.status(200).json({ ...event, contests });
   } catch (err) {
-    console.error(`error: ${err}`);
+    console.error('error: ${err}');
     res.status(500).json({ message: "server error" });
   }
 });
@@ -130,7 +132,7 @@ router.get("/:id/leaderboard", async (req, res) => {
       .orderBy(desc(eventParticipants.participantScore));
     res.status(200).json(results);
   } catch (err) {
-    console.error(`error: ${err}`);
+    console.error('error: ${err}');
     res.status(500).json({ message: "server error" });
   }
 });
@@ -150,7 +152,7 @@ router.get("/contest/:contestId", async (req, res) => {
     }
     res.status(200).json(info);
   } catch (err) {
-    console.error(`error: ${err}`);
+    console.error('error: ${err}');
     res.status(500).json({ message: "server error" });
   }
 });
@@ -172,7 +174,7 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
         .select({
           groupId: eventGroups.id,
           groupName: eventGroups.name,
-          score: sql<number>`cast(sum(${eventContestsScore.contestScore}) as int)`,
+          score: sql<number>'cast(sum(${eventContestsScore.contestScore}) as int)',
         })
         .from(eventGroups)
         .innerJoin(
@@ -183,7 +185,7 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
         )
         .where(eq(eventContestsScore.contestId, contestId))
         .groupBy(eventGroups.id, eventGroups.name)
-        .orderBy(desc(sql`sum(${eventContestsScore.contestScore})`));
+        .orderBy(desc(sql'sum(${eventContestsScore.contestScore})'));
       res.status(200).json(results);
       return;
     }
@@ -202,17 +204,9 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
       }
       // get members group info
       const [membership] = await db
-        .select({
-          participantId: eventParticipants.id,
-          groupId: eventParticipants.groupId,
-        })
+        .select({participantId: eventParticipants.id, groupId: eventParticipants.groupId, })
         .from(eventParticipants)
-        .where(
-          and(
-            eq(eventParticipants.eventId, contest.eventId),
-            eq(eventParticipants.userId, userId)
-          )
-        )
+        .where(and(eq(eventParticipants.eventId, contest.eventId), eq(eventParticipants.userId, userId)))
         .limit(1);
 
       if (!membership || !membership.groupId) {
@@ -231,11 +225,7 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
         .from(eventParticipants)
         .innerJoin(users, eq(eventParticipants.userId, users.id))
         .innerJoin(eventContestsScore, eq(eventParticipants.id, eventContestsScore.participantId))
-        .where(
-          and(
-            eq(eventContestsScore.contestId, contestId),
-            eq(eventParticipants.groupId, membership.groupId)
-          )
+        .where(and(eq(eventContestsScore.contestId, contestId), eq(eventParticipants.groupId, membership.groupId))
         )
         .orderBy(desc(eventContestsScore.contestScore));
 
@@ -258,54 +248,47 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
       .innerJoin(eventContestsScore, eq(eventParticipants.id, eventContestsScore.participantId))
       // if usre isnt in a group it still sohws them. 
       // this is useless unless we show groups in the global leaderboard 
-      // so if we arent doing that we can just remove these left joins
+      // so if we arent doing that we can just remove these left joins      
       .leftJoin(eventGroups, eq(eventParticipants.groupId, eventGroups.id))
       .where(eq(eventContestsScore.contestId, contestId))
       .orderBy(desc(eventContestsScore.contestScore));
     res.status(200).json(results);
   } catch (err) {
-    console.error(`error: ${err}`);
+    console.error('error: ${err}');
     res.status(500).json({ message: "server error" });
   }
 });
 
-router.post("/contests", requireCruxMember, async (req, res) => {
-  const { contestId, eventId, name } = req.body;
-
-  if (!contestId || !eventId) {
-    res.status(400).json({ message: "missing required fields" });
+// get all groups and members for an event
+router.get("/:id/groups", requireCruxMember, async (req, res) => {
+  const eventId = parseInt(req.params.id);
+  if (isNaN(eventId)) {
+    res.status(400).json({ message: "invalid id" });
     return;
   }
 
   try {
-    // verify the parent event exists before attaching a contest
-    const [associatedEvent] = await db.select().from(events).where(eq(events.id, eventId)).limit(1);
-    if (!associatedEvent) {
-      res.status(404).json({ message: "The specified event ID does not exist." });
-      return;
-    }
+    const groups = await db
+      .select({id: eventGroups.id, name: eventGroups.name,})
+      .from(eventGroups)
+      .where(eq(eventGroups.eventId, eventId));
 
-    const [newContest] = await db.insert(eventContests)
-      .values({
-        // Get the duration and startTime from CF API
-        eventId: eventId,
-        name: name,
-        // startTime: 
-        // durationMinutes: 
-        createdAt: new Date().toISOString(),
-      }).returning();
+    const results = await Promise.all(
+      groups.map(async (g) => {
+        const members = await db
+          .select({ email: users.email, })
+          .from(eventParticipants)
+          .innerJoin(users, eq(eventParticipants.userId, users.id))
+          .where(eq(eventParticipants.groupId, g.id));
 
-    res.status(201).json({
-      message: "Contest deployed successfully!",
-      contest: newContest,
-    });
-  } catch (err: any) {
-    console.error(`Error deploying contest: ${err}`);
-    if (err.code === "23505") {
-       res.status(409).json({ message: "Contest ID already deployed for this event." });
-       return;
-    }
-    res.status(500).json({ message: "Internal server error while creating contest." });
+        return {...g, members: members.map((m) => m.email), };
+      })
+    );
+
+    res.status(200).json(results);
+  } catch (err) {
+    console.error('error fetching groups: ${err}');
+    res.status(500).json({ message: "server error" });
   }
 });
 
@@ -327,96 +310,184 @@ router.post(
         res.status(404).json({ message: "contest not found" });
         return;
       }
-
-      await codeforcesQueue.add(
-        "cf-api",
-        { type: "event.sync", contestId },
-        { removeOnComplete: true }
-      );
-
+      await addWithRetry(codeforcesQueue, "cf-api", { type: "event.sync", contestId });
       res.status(200).json({ message: "sync job is queued" });
     } catch (err) {
-      console.error(`error: ${err}`);
+      console.error('error: ${err}');
       res.status(500).json({ message: "server error" });
     }
   }
 );
 
-router.post("/groups", async (req, res) => {
-  const { eventId, name, members } = req.body;
+// add new contest to event
+router.post("/contests", requireCruxMember, async (req, res) => {
+  const { contestId, eventId } = req.body;
+  if (!contestId || !eventId) {
+    res.status(400).json({ message: "missing required fields" });
+    return;
+  }
+
+  try {
+    // verify the parent event exists before attaching a contest    
+    const [associatedEvent] = await db.select().from(events).where(eq(events.id, eventId)).limit(1);
+    if (!associatedEvent) {
+      res.status(404).json({ message: "The specified event ID does not exist." });
+      return;
+    }
+
+    // fetch metadata from cf
+    const metadata = await getContestMetadata(contestId);
+    const [newContest] = await db.insert(eventContests)
+      .values({
+        id: metadata.id,
+        eventId: eventId,
+        name: metadata.name,
+        startTime: metadata.startTime,
+        durationMinutes: metadata.durationMinutes,
+      }).returning();
+
+    res.status(201).json({
+      message: "Contest deployed successfully!",
+      contest: newContest,
+    });
+  } catch (err: any) {
+    console.error('Error deploying contest: ${err}');
+    if (err.code === "23505") {
+      res.status(409).json({ message: "Contest ID already deployed for this event." });
+      return;
+    }
+    res.status(500).json({ message: "Internal server error while creating contest." });
+  }
+});
+
+// create group and resolve emails to ids
+router.post("/groups", requireCruxMember, async (req, res) => {
+  const { eventId, name, members } = req.body; //members = array of emails
+  if (!eventId || !name || !Array.isArray(members)) {
+    res.status(400).json({ message: "invalid input" });
+    return;
+  }
 
   try {
     const [group] = await db.insert(eventGroups).values({ eventId, name }).returning();
 
-    const failedMembers: string[] = [];
-    
-   // Code should be added here to get the userId from email. 
-    for (const email of members) {
-      try {
-        await db.insert(eventParticipants).values({ 
-          groupId: group.id, 
-          userId: email, 
-          eventId 
-        });
-      } catch {
-        failedMembers.push(email);
-      }
+    // resolve emails to user ids
+    const matchedUsers = await db
+      .select({ id: users.id, email: users.email })
+      .from(users)
+      .where(inArray(users.email, members));
+
+    const userIds = matchedUsers.map((u) => u.id);
+    const matchedEmails = new Set(matchedUsers.map((u) => u.email));
+    const failedEmails = members.filter((e) => !matchedEmails.has(e));
+
+    if (userIds.length > 0) {
+      await db.insert(eventParticipants).values(
+        userIds.map((uid) => ({groupId: group.id, userId: uid, eventId, }))
+      ).onConflictDoNothing();
     }
 
-    res.status(201).json({ message: "Group created, Following members were not added to the group:", failedMembers });
+    res.status(201).json({ 
+      message: "group created", 
+      failedMembers: failedEmails 
+    });
   } catch (err) {
-    console.error("Server error while creating group:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("error creating group:", err);
+    res.status(500).json({ message: "server error" });
   }
 });
 
-router.put("/groups/:groupId", async (req, res) => {
-  const { groupId } = req.params;
+// update group name and add new members
+router.put("/groups/:groupId", requireCruxMember, async (req, res) => {
+  const groupId = parseInt(req.params.groupId);
   const { name, members, eventId } = req.body;
+  
+  if (isNaN(groupId) || !eventId || !name || !Array.isArray(members)) {
+    res.status(400).json({ message: "invalid input" });
+    return;
+  }
+
   try {
-    // Update group name
-    await db.update(eventGroups).set({ name }).where(eq(eventGroups.id, Number(groupId)));
+    let failedEmails: string[] = [];
+    await db.transaction(async (tx) => {
+      // Update group name
+      await tx.update(eventGroups).set({ name }).where(eq(eventGroups.id, groupId));
 
-    // Dealing with addition or deletion of participants
-    const failedMembers: string[] = [];
-   // Code should be added here to get the userId from email. 
-    for (const email of members) {
-      try {
-        await db.insert(eventParticipants).values({ groupId: Number(groupId), userId: email, eventId });
-      } catch {
-        failedMembers.push(email);
+      // resolve emails to ids
+      const matchedUsers = await tx
+        .select({ id: users.id, email: users.email })
+        .from(users)
+        .where(inArray(users.email, members));
+
+      const userIds = matchedUsers.map((u) => u.id);
+      const matchedEmails = new Set(matchedUsers.map((u) => u.email));
+      failedEmails = members.filter((e) => !matchedEmails.has(e));
+
+      // just add new members, dont delete old ones
+      if (userIds.length > 0) {
+        await tx.insert(eventParticipants).values(
+          userIds.map((uid) => ({groupId, userId: uid, eventId,}))
+        ).onConflictDoNothing();
       }
-    }
+    });
 
-    res.json({ message: "Group updated", failedMembers });
+    res.status(200).json({ 
+      message: "group updated", 
+      failedMembers: failedEmails 
+    });
   } catch (err) {
     console.error("Critical error updating group:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-router.delete("/groups/:groupId", async (req, res) => {
-  const groupId = parseInt(req.params.groupId);
+// remove individual participant from event
+router.delete("/participants/:participantId", requireCruxMember, async (req, res) => {
+  const participantId = parseInt(req.params.participantId);
+  if (isNaN(participantId)) {
+    res.status(400).json({ message: "invalid id" });
+    return;
+  }
+  try {
+    await db.delete(eventParticipants).where(eq(eventParticipants.id, participantId));
+    res.status(200).json({ message: "participant removed" });
+  } catch (err) {
+    console.error('error: ${err}');
+    res.status(500).json({ message: "server error" });
+  }
+});
 
+// delete group only (members stay in event but become unassigned)
+router.delete("/groups/:groupId", requireCruxMember, async (req, res) => {
+  const groupId = parseInt(req.params.groupId);
   if (isNaN(groupId)) {
     res.status(400).json({ message: "Invalid group ID" });
     return;
   }
-
   try {
-    await db.transaction(async (tx) => {
-      await tx.delete(eventParticipants)
-        .where(eq(eventParticipants.groupId, groupId));
-
-      await tx.delete(eventGroups)
-        .where(eq(eventGroups.id, groupId));
-    });
-
-    res.status(200).json({ message: "Group and participants deleted successfully" });
+    // on deletion the group id will be set to null in the db
+    await db.delete(eventGroups).where(eq(eventGroups.id, groupId));
+    res.status(200).json({ message: "Group deleted successfully" });
   } catch (err) {
-    console.error(`error: ${err}`);
+    console.error('error: ${err}');
     res.status(500).json({ message: "Server error" });
   }
 });
-export default router;
 
+// delete contest from event
+router.delete("/contest/:contestId", requireCruxMember, async (req, res) => {
+  const contestId = parseInt(req.params.contestId);
+  if (isNaN(contestId)) {
+    res.status(400).json({ message: "Invalid id" });
+    return;
+  }
+  try {
+    await db.delete(eventContests).where(eq(eventContests.id, contestId));
+    res.status(200).json({ message: "Contest deleted" });
+  } catch (err) {
+    console.error('error: ${err}');
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+export default router;

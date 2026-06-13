@@ -21,7 +21,7 @@ interface PastContest {
 
 const scrollbar = "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full";
 
-export const Route = createFileRoute('/events')({
+export const Route = createFileRoute('/adminEvents')({
   component: AdminEventsComponent,
 });
 
