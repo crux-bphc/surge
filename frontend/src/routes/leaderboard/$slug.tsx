@@ -14,6 +14,7 @@ export const Route = createFileRoute("/leaderboard/$slug")({
     return {
       batch: typeof search.batch === "string" ? search.batch : undefined,
       level: typeof search.level === "string" ? search.level : undefined,
+      group: typeof search.group === "string" ? search.group : undefined,
     };
   },
 });
@@ -25,7 +26,7 @@ function RouteComponent() {
   const { user } = useAuth();
   const { slug } = useParams({ from: "/leaderboard/$slug" });
 
-  const { batch, level } = Route.useSearch();
+  const { batch, level, group } = Route.useSearch();
 
   useEffect(() => {
     axios
@@ -44,17 +45,25 @@ function RouteComponent() {
   const filteredLeaderboard = useMemo(() => {
     return leaderboardData
       .filter((entry: Leaderboard) => !batch || entry.batch === batch)
+      .filter((entry: Leaderboard) => !group || entry.groupName === group)
       .filter(
         (entry: Leaderboard) =>
           !level || getRatingLevel(entry.cfRating) === level
       );
-  }, [batch, level, leaderboardData]);
+  }, [batch, level, group, leaderboardData]);
 
   const batches = [
     ...new Set<string>(leaderboardData.map((user) => user.batch)),
   ]
     .filter((batch) => (batch ? true : false))
     .sort((a, b) => parseInt(b) - parseInt(a));
+
+  const groups = useMemo(() => {
+    const g = [
+      ...new Set<string>(leaderboardData.map((user) => user.groupName || "")),
+    ].filter((g) => g !== "");
+    return g.length > 0 ? g : undefined;
+  }, [leaderboardData]);
 
   if (loading) return <LoadingIndicator />;
 
@@ -67,14 +76,21 @@ function RouteComponent() {
       </div>
     );
 
+  const hasPoints = leaderboardData.some(
+    (u) => u.points !== undefined || u.score !== undefined
+  );
+
   return (
     <div className="w-full max-w-7xl m-auto">
       <LeaderboardHeader
         batches={batches}
+        groups={groups}
         leaderboard={filteredLeaderboard}
         path={"/leaderboard/$slug"}
       />
+
       {/* leaderboard for top 3 */}
+
       <div className="h-80 mx-auto flex justify-center items-end mb-15 mt-15">
         <div className={`flex justify-around items-end h-50 w-150 rounded-xl`}>
           {filteredLeaderboard[1] && (
@@ -109,7 +125,11 @@ function RouteComponent() {
                 {filteredLeaderboard[1].rank || "-"}
               </div>
               <div className="text-xs md:text-sm flex justify-center items-center">
-                {getRatingLevel(filteredLeaderboard[1].cfRating)}
+                {hasPoints
+                  ? filteredLeaderboard[1].points ||
+                    filteredLeaderboard[1].score ||
+                    0
+                  : getRatingLevel(filteredLeaderboard[1].cfRating)}
               </div>
             </div>
           )}
@@ -145,7 +165,11 @@ function RouteComponent() {
                 {filteredLeaderboard[0].rank || "-"}
               </div>
               <div className="text-xs md:text-sm flex justify-center items-center">
-                {getRatingLevel(filteredLeaderboard[0].cfRating)}
+                {hasPoints
+                  ? filteredLeaderboard[0].points ||
+                    filteredLeaderboard[0].score ||
+                    0
+                  : getRatingLevel(filteredLeaderboard[0].cfRating)}
               </div>
               <div className="text-LG font-bold flex justify-center items-center">
                 WINNER
@@ -184,13 +208,17 @@ function RouteComponent() {
                 {filteredLeaderboard[2].rank || "-"}
               </div>
               <div className="text-xs md:text-sm flex justify-center items-center">
-                {getRatingLevel(filteredLeaderboard[2].cfRating)}
+                {hasPoints
+                  ? filteredLeaderboard[2].points ||
+                    filteredLeaderboard[2].score ||
+                    0
+                  : getRatingLevel(filteredLeaderboard[2].cfRating)}
               </div>
             </div>
           )}
         </div>
       </div>
-      {/* leaderboard for other than top 3 */}
+
       <div className="md:mx-10 flex flex-col">
         {filteredLeaderboard.slice(3).map((leaderboardUser, index) => (
           <div
@@ -218,11 +246,25 @@ function RouteComponent() {
               <div className="w-8 md:w-16 text-sm text-center md:text-base flex justify-center items-center">
                 {leaderboardUser.batch || "N/A"}
               </div>
-              <div className="w-8 md:w-16 text-sm text-center md:text-base flex justify-center items-center">
-                {leaderboardUser.rank || "-"}
+              <div className="w-8 md:w-16 text-sm text-center md:text-base flex flex-col justify-center items-center">
+                <span className="text-muted text-[8px] uppercase md:hidden">
+                  Rank
+                </span>
+                <span>{leaderboardUser.rank || "-"}</span>
               </div>
-              <div className="w-20 md:w-32 text-sm text-center md:text-base flex justify-center items-center md:pr-2">
-                {getRatingLevel(leaderboardUser.cfRating)}
+              <div className="w-20 md:w-32 text-sm text-center md:text-base flex flex-col justify-center items-center md:pr-2">
+                {hasPoints ? (
+                  <>
+                    <span className="text-muted text-[8px] uppercase md:hidden">
+                      Points
+                    </span>
+                    <span className="text-highlight-lighter font-bold">
+                      {leaderboardUser.points || leaderboardUser.score || 0}
+                    </span>
+                  </>
+                ) : (
+                  <span>{getRatingLevel(leaderboardUser.cfRating)}</span>
+                )}
               </div>
             </div>
           </div>
