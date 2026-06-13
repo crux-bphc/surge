@@ -7,8 +7,6 @@ type DropdownProps = {
   selectedValue?: string;
   placeholder: string;
   field: string;
-  variant?: "default" | "small";
-  allowClear?: boolean;
 };
 
 function updateDropdown<T extends Record<string, string | undefined>>(
@@ -28,8 +26,6 @@ export default function Dropdown({
   selectedValue,
   placeholder,
   field,
-  variant = "default",
-  allowClear = true,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -37,44 +33,29 @@ export default function Dropdown({
     setIsOpen(false);
   });
 
-  const dropDownOptions = allowClear ? ["", ...options] : options;
-
-  const buttonClasses =
-    variant === "small"
-      ? "z-20 flex h-10 w-48 cursor-pointer items-center justify-center rounded-3xl bg-[#25293E] text-sm hover:bg-[#25294F]"
-      : "z-20 flex h-10 w-full cursor-pointer items-center justify-center rounded-3xl bg-[#25293E] text-sm hover:bg-[#25294F]";
-
-  const dropdownContainerClasses =
-    variant === "small"
-      ? "absolute top-10 flex w-48 flex-col items-center justify-evenly text-xs z-25 mt-1"
-      : "absolute top-10 flex w-full flex-col items-center justify-evenly text-xs z-25 mt-1";
-
-  const optionClasses =
-    variant === "small"
-      ? "absolute top-0 flex rounded-sm h-8 w-full shadow-3xl cursor-pointer items-center justify-center border border-y-1 border-x-0 border-[#1B1E30] bg-[#25293E] transition-all duration-200 ease-out hover:bg-[#25294F]"
-      : "absolute top-0 flex rounded-sm h-8 w-full max-w-[10.5rem] shadow-3xl cursor-pointer items-center justify-center border border-y-1 border-x-0 border-[#1B1E30] bg-[#25293E] transition-all duration-200 ease-out hover:bg-[#25294F] md:w-42";
+  const dropDownOptions = ["", ...options];
 
   return (
-    <div
-      ref={ref}
-      className={`relative flex ${variant === "small" ? "w-fit" : "w-full"} flex-col z-20`}
-    >
-      <button onClick={() => setIsOpen(!isOpen)} className={buttonClasses}>
+    <div ref={ref} className="relative flex w-full flex-col z-20">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="z-20 flex h-10 w-full cursor-pointer items-center justify-center rounded-3xl bg-[#25293E] text-sm hover:bg-[#25294F]"
+      >
         {selectedValue || placeholder}
       </button>
 
-      <div className={dropdownContainerClasses}>
+      <div className="absolute top-10 flex w-full flex-col items-center justify-evenly text-xs z-25 mt-1">
         {dropDownOptions.map((option, index) => (
           <Link
             to="."
             key={`${field}-${option || "N/A"}`}
             search={(prev) => updateDropdown(prev, field, option || undefined)}
             onClick={() => setIsOpen(false)}
-            className={optionClasses}
+            className="absolute top-0 flex rounded-sm h-8 w-full max-w-[10.5rem] shadow-3xl cursor-pointer items-center justify-center border border-y-1 border-x-0 border-[#1B1E30] bg-[#25293E] transition-all duration-200 ease-out hover:bg-[#25294F] md:w-42"
             style={{
               transform: isOpen
                 ? `translateY(${index * 2}rem)`
-                : "translateY(-2.5rem)",
+                : "translateY(-2.5rem)", // Hides the element
               opacity: isOpen ? 1 : 0,
               pointerEvents: isOpen ? "auto" : "none",
             }}
