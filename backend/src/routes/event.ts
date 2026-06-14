@@ -81,12 +81,7 @@ router.get("/:id/leaderboard", async (req, res) => {
       const [membership] = await db
         .select({ groupId: eventParticipants.groupId })
         .from(eventParticipants)
-        .where(
-          and(
-            eq(eventParticipants.eventId, eventId),
-            eq(eventParticipants.userId, userId)
-          )
-        )
+        .where(and(eq(eventParticipants.eventId, eventId), eq(eventParticipants.userId, userId)))
         .limit(1);
 
       if (!membership || !membership.groupId) {
@@ -98,18 +93,17 @@ router.get("/:id/leaderboard", async (req, res) => {
         .select({
           userId: users.id,
           name: users.name,
+          email: users.email,
           cfHandle: users.cfHandle,
+          cfRating: users.cfRating,
           pfpUrl: users.pfpUrl,
+          groupName: eventGroups.name,
           score: eventParticipants.participantScore,
         })
         .from(eventParticipants)
         .innerJoin(users, eq(eventParticipants.userId, users.id))
-        .where(
-          and(
-            eq(eventParticipants.eventId, eventId),
-            eq(eventParticipants.groupId, membership.groupId)
-          )
-        )
+        .innerJoin(eventGroups, eq(eventParticipants.groupId, eventGroups.id))
+        .where(and(eq(eventParticipants.eventId, eventId), eq(eventParticipants.groupId, membership.groupId)))
         .orderBy(desc(eventParticipants.participantScore));
       res.status(200).json(results);
       return;
@@ -170,20 +164,30 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
   try {
     // group v group for a contest
     if (type === "group-vs-group") {
+      const contestLookup = await db.select({eventId: eventContests.eventId}).from(eventContests).where(eq(eventContests.id, contestId)).limit(1);
+      
+      const parentEventId = contestLookup[0]?.eventId;
+      if (!parentEventId) {
+        res.status(404).json({ message: "contest not found" });
+        return;
+      }
+
       const results = await db
         .select({
           groupId: eventGroups.id,
           groupName: eventGroups.name,
-          score: sql<number>`cast(sum(${eventContestsScore.contestScore}) as int)`,
+          score: sql`cast(coalesce(sum(${eventContestsScore.contestScore}), 0) as int)`.mapWith(Number),
         })
         .from(eventGroups)
-        .innerJoin(
-          eventParticipants, eq(eventGroups.id, eventParticipants.groupId)
-        )
-        .innerJoin(
-          eventContestsScore, eq(eventParticipants.id, eventContestsScore.participantId)
-        )
-        .where(eq(eventContestsScore.contestId, contestId))
+        // shows you if you aren't in a group
+        .leftJoin(eventParticipants, eq(eventGroups.id, eventParticipants.groupId))
+        // shows you if you didnt solve anyth also 
+        .leftJoin(eventContestsScore,
+          and(
+            eq(eventParticipants.id, eventContestsScore.participantId),
+            eq(eventContestsScore.contestId, contestId)
+          ))
+        .where(eq(eventGroups.eventId, parentEventId))
         .groupBy(eventGroups.id, eventGroups.name)
         .orderBy(desc(sql`sum(${eventContestsScore.contestScore})`));
       res.status(200).json(results);
@@ -206,8 +210,7 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
       const [membership] = await db
         .select({participantId: eventParticipants.id, groupId: eventParticipants.groupId, })
         .from(eventParticipants)
-        .where(and(eq(eventParticipants.eventId, contest.eventId), eq(eventParticipants.userId, userId))
-        )
+        .where(and(eq(eventParticipants.eventId, contest.eventId), eq(eventParticipants.userId, userId)))
         .limit(1);
 
       if (!membership || !membership.groupId) {
@@ -219,39 +222,55 @@ router.get("/contest/:contestId/leaderboard", async (req, res) => {
         .select({
           userId: users.id,
           name: users.name,
+          email: users.email,
           cfHandle: users.cfHandle,
+          cfRating: users.cfRating,
           pfpUrl: users.pfpUrl,
           score: eventContestsScore.contestScore,
         })
         .from(eventParticipants)
         .innerJoin(users, eq(eventParticipants.userId, users.id))
-        .innerJoin(eventContestsScore, eq(eventParticipants.id, eventContestsScore.participantId))
+        .leftJoin(eventContestsScore, and(
+            eq(eventParticipants.id, eventContestsScore.participantId),
+            eq(eventContestsScore.contestId, contestId)
+          ))
         .where(and(eq(eventContestsScore.contestId, contestId), eq(eventParticipants.groupId, membership.groupId)))
-        .orderBy(desc(eventContestsScore.contestScore));
+        .orderBy(desc(sql`coalesce(${eventContestsScore.contestScore}, 0)`));
 
       res.status(200).json(results);
       return;
     }
 
     // global for a specific contest
+    const [contestInfo] = await db.select().from(eventContests).where(eq(eventContests.id, contestId)).limit(1);
+    if (!contestInfo) {
+      res.status(404).json({ message: "contest not found" });
+      return;
+    }
+
     const results = await db
       .select({
         userId: users.id,
         name: users.name,
+        email: users.email,
         cfHandle: users.cfHandle,
+        cfRating: users.cfRating,
         pfpUrl: users.pfpUrl,
         groupName: eventGroups.name,
         score: eventContestsScore.contestScore,
       })
       .from(eventParticipants)
       .innerJoin(users, eq(eventParticipants.userId, users.id))
-      .innerJoin(eventContestsScore, eq(eventParticipants.id, eventContestsScore.participantId))
       // if usre isnt in a group it still sohws them. 
       // this is useless unless we show groups in the global leaderboard 
       // so if we arent doing that we can just remove these left joins      
       .leftJoin(eventGroups, eq(eventParticipants.groupId, eventGroups.id))
-      .where(eq(eventContestsScore.contestId, contestId))
-      .orderBy(desc(eventContestsScore.contestScore));
+      .leftJoin(eventContestsScore, and(
+          eq(eventParticipants.id, eventContestsScore.participantId),
+          eq(eventContestsScore.contestId, contestId)
+        ))
+      .where(eq(eventParticipants.eventId, contestInfo.eventId))
+      .orderBy(desc(sql`coalesce(${eventContestsScore.contestScore}, 0)`));
     res.status(200).json(results);
   } catch (err) {
     console.error(`error: ${err}`);
@@ -269,19 +288,19 @@ router.get("/:id/groups", requireCruxMember, async (req, res) => {
 
   try {
     const groups = await db
-      .select({id: eventGroups.id, name: eventGroups.name, })
+      .select({id: eventGroups.id, name: eventGroups.name,})
       .from(eventGroups)
       .where(eq(eventGroups.eventId, eventId));
 
     const results = await Promise.all(
       groups.map(async (g) => {
         const members = await db
-          .select({ email: users.email, })
+          .select({ email: users.email, participantId: eventParticipants.id, })
           .from(eventParticipants)
           .innerJoin(users, eq(eventParticipants.userId, users.id))
           .where(eq(eventParticipants.groupId, g.id));
 
-        return {...g, members: members.map((m) => m.email), };
+        return {...g, members: members, };
       })
     );
 
@@ -356,13 +375,13 @@ router.post("/contests", requireCruxMember, async (req, res) => {
       res.status(409).json({ message: "Contest ID already deployed for this event." });
       return;
     }
-    res.status(500).json({ message: "Internal server error while creating contest." });
+    res.status(500).json({ message: "Internal server error while creating contest.", detail: err.message || "unknown error, check logs lol" });
   }
 });
 
 // create group and resolve emails to ids
 router.post("/groups", requireCruxMember, async (req, res) => {
-  const { eventId, name, members } = req.body; // members = array of emails
+  const { eventId, name, members } = req.body; //members = array of emails
   if (!eventId || !name || !Array.isArray(members)) {
     res.status(400).json({ message: "invalid input" });
     return;
