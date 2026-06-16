@@ -115,7 +115,7 @@ export default function LeaderboardHeader({
             <div
               className={`flex w-full justify-between gap-4 md:w-auto z-20 ${hideSearch ? "md:ml-auto" : "md:min-w-[22rem]"}`}
             >
-              {path === "/events/$slug" ? (
+              {path === "/events/$slug" || path === "/leaderboard/$slug" ? (
                 <Dropdown
                   options={["Global", "My Group", "Group Wise"]}
                   selectedValue={view || "Global"}

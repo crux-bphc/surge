@@ -1,15 +1,20 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import axios from 'axios';
 import { 
   Plus, Trash2, Pencil, X, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw, House
 } from 'lucide-react';
 
 const emailRegex = /^f\d{8}@hyderabad\.bits-pilani\.ac\.in$/;
+interface GroupMember {
+  email: string;
+  participantId: number;
+}
 
 interface Group {
   id: string;
   name: string;
-  members: string[];
+  members: GroupMember[];
 }
 
 interface PastContest {
@@ -27,48 +32,75 @@ export const Route = createFileRoute('/adminEvents')({
 
 function AdminEventsComponent() {
   const [contestId, setContestId] = useState('');
-  const [liveContestId, setLiveContestId] = useState('1090');
   const [isContestSaved, setIsContestSaved] = useState(false);
   const [isGlobalSaving, setIsGlobalSaving] = useState(false);
 
-  const [groups, setGroups] = useState<Group[]>([
-    { id: '1', name: 'Cros', members: ['f20251284@hyderabad.bits-pilani.ac.in', 'f20230008@hyderabad.bits-pilani.ac.in', 'f20250132@hyderabad.bits-pilani.ac.in'] },
-    { id: '2', name: 'Fros', members: ['f20251120@hyderabad.bits-pilani.ac.in', 'f20250084@hyderabad.bits-pilani.ac.in', 'f20250044@hyderabad.bits-pilani.ac.in', 'f20241084@hyderabad.bits-pilani.ac.in', 'f20230034@hyderabad.bits-pilani.ac.in'] }
-  ]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [pastContests, setPastContests] = useState<PastContest[]>([]);
   
   const [newGroupName, setNewGroupName] = useState('');
   const [currentUserEmail, setCurrentUserEmail] = useState('');
-  const [currentGroupMembers, setCurrentGroupMembers] = useState<string[]>([]);
+  const [currentGroupMembers, setCurrentGroupMembers] = useState<string[]>([]); // simplified draft list (emails only)
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   
   const [groupToDelete, setGroupToDelete] = useState<{ id: string; name: string } | null>(null);
   const [contestToDelete, setContestToDelete] = useState<{ contestId: string; name: string } | null>(null);
 
-  const [pastContests, setPastContests] = useState<PastContest[]>([
-    { contestId: '1089', name: 'Contest #3', date: '2026-06-01', duration: '2h 00m' },
-    { contestId: '1088', name: 'Contest #2', date: '2026-05-25', duration: '2h 00m' },
-    { contestId: '1087', name: 'Contest #1', date: '2026-05-18', duration: '2h 30m' },
-  ]);
+  // hardcoded for summer of cc 2026 (id 1) for now
+  // this needs to be changed a bit 
+  // and also some event dashboard thing for admin to get the admin thing for an event probably
+  // im not doing allat
+  const eventId = 1;
+  const fetchData = useCallback(async () => {
+    try {
+      const eventRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`);
+      if (eventRes.data && eventRes.data.contests) {
+        setPastContests(eventRes.data.contests.map((c: any) => ({
+          contestId: c.id.toString(),
+          name: c.name,
+          date: new Date(c.startTime).toLocaleDateString(),
+          duration: `${Math.floor(c.durationMinutes / 60)}h ${c.durationMinutes % 60}m`
+        })));
+      }
+      const groupsRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/groups`);
+      if (groupsRes.data) {
+        setGroups(groupsRes.data);
+      }
+    } catch (err) {
+      console.error("error fetching data:", err);
+    }
+  }, [eventId]);
 
-  const handleSaveContest = (e: React.FormEvent) => {
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleSaveContest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contestId.trim()) return;
-    
-    setLiveContestId(contestId.trim());
-    setIsContestSaved(true);
-    
-    setPastContests(prev => [
-      { 
-        contestId: contestId.trim(), 
-        name: `Contest #${prev.length + 1}`, 
-        date: new Date().toISOString().split('T')[0], 
-        duration: '2h 00m' 
-      },
-      ...prev
-    ]);
-    
-    setContestId('');
-    setTimeout(() => setIsContestSaved(false), 3000);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event/contests`, {
+        contestId: parseInt(contestId),
+        eventId: eventId
+      });
+      
+      await fetchData();
+      setIsContestSaved(true);
+      setContestId('');
+      setTimeout(() => setIsContestSaved(false), 3000);
+    } catch (err: any) {
+      console.error("error adding contest:", err);
+      const detail = err.response?.data?.detail || err.response?.data?.message || "check console for details";
+      alert(`failed to add contest: ${detail}`);
+    }
+  };
+
+  const handleRefreshLeaderboard = async (cid: string) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event/contest/${cid}/sync`);
+      alert("sync job added to queue");
+    } catch (err) {
+      console.error("error syncing leaderboard:", err);
+      alert("failed to queue sync job.");
+    }
   };
 
   const handleGlobalSavePortal = () => {
@@ -76,7 +108,7 @@ function AdminEventsComponent() {
     setTimeout(() => setIsGlobalSaving(false), 2000);
   };
 
-  const handleAddMemberToDraft = (e: React.FormEvent) => {
+  const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const email = currentUserEmail.trim();
 
@@ -86,25 +118,59 @@ function AdminEventsComponent() {
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGroupName.trim()) return;
 
-    if (editingGroupId) {
-      setGroups(groups.map(g => g.id === editingGroupId ? { ...g, name: newGroupName.trim(), members: currentGroupMembers } : g));
+    try {
+      if (editingGroupId) {
+        const originalGroup = groups.find(g => g.id === editingGroupId);
+        const originalEmails = new Set(originalGroup?.members.map(m => m.email) ?? []);
+        const currentEmails = new Set(currentGroupMembers);
+
+        const removedParticipants = originalGroup?.members.filter(m => !currentEmails.has(m.email)) ?? [];
+        await Promise.all(
+          removedParticipants.map(m =>
+            axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/participants/${m.participantId}`)
+          )
+        );
+
+        // add new members and update name
+        const res = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/event/groups/${editingGroupId}`, {
+          name: newGroupName.trim(),
+          members: currentGroupMembers.filter(e => !originalEmails.has(e)), // add new ones
+          eventId: eventId
+        });
+        
+        if (res.data.failedMembers?.length > 0) {
+          alert(`group updated, but these members weren't found in system: ${res.data.failedMembers.join(', ')}`);
+        }
+      } else {
+        const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event/groups`, {
+          name: newGroupName.trim(),
+          members: currentGroupMembers,
+          eventId: eventId
+        });
+
+        if (res.data.failedMembers?.length > 0) {
+          alert(`group created, but these members weren't found in system: ${res.data.failedMembers.join(', ')}`);
+        }
+      }
+      
+      await fetchData();
+      setNewGroupName('');
+      setCurrentGroupMembers([]);
       setEditingGroupId(null);
-    } else {
-      setGroups([...groups, { id: Date.now().toString(), name: newGroupName.trim(), members: currentGroupMembers }]);
+    } catch (err) {
+      console.error("error saving group:", err);
+      alert("failed to save group.");
     }
-    
-    setNewGroupName('');
-    setCurrentGroupMembers([]);
   };
 
   const handleStartEdit = (group: Group) => {
     setEditingGroupId(group.id);
     setNewGroupName(group.name);
-    setCurrentGroupMembers([...group.members]);
+    setCurrentGroupMembers(group.members.map(m => m.email));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -114,17 +180,29 @@ function AdminEventsComponent() {
     setCurrentGroupMembers([]);
   };
 
-  const confirmDeleteGroup = () => {
+  const confirmDeleteGroup = async () => {
     if (!groupToDelete) return;
-    if (editingGroupId === groupToDelete.id) handleCancelEdit();
-    setGroups(groups.filter(g => g.id !== groupToDelete.id));
-    setGroupToDelete(null);
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/groups/${groupToDelete.id}`);
+      if (editingGroupId === groupToDelete.id) handleCancelEdit();
+      await fetchData();
+      setGroupToDelete(null);
+    } catch (err) {
+      console.error("error deleting group:", err);
+      alert("failed to delete group.");
+    }
   };
 
-  const confirmDeleteContest = () => {
+  const confirmDeleteContest = async () => {
     if (!contestToDelete) return;
-    setPastContests(pastContests.filter(c => c.contestId !== contestToDelete.contestId));
-    setContestToDelete(null);
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/contest/${contestToDelete.contestId}`);
+      await fetchData();
+      setContestToDelete(null);
+    } catch (err) {
+      console.error("error deleting contest:", err);
+      alert("failed to delete contest.");
+    }
   };
 
   return (
@@ -170,7 +248,10 @@ function AdminEventsComponent() {
                   <td className="py-3 px-4">{contest.date}</td>
                   <td className="py-3 px-4 text-slate-400">{contest.duration}</td>
                   <td className="py-3 px-4 text-center">
-                    <button className="bg-emerald-600 hover:bg-emerald-500 text-white py-1.5 px-3 rounded flex items-center gap-1.5 text-xs transition-colors mx-auto">
+                    <button 
+                      onClick={() => handleRefreshLeaderboard(contest.contestId)}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white py-1.5 px-3 rounded flex items-center gap-1.5 text-xs transition-colors mx-auto"
+                    >
                       <RefreshCw className="w-3.5 h-3.5" /> Refresh Leaderboard
                     </button>
                   </td>
@@ -207,7 +288,7 @@ function AdminEventsComponent() {
                 disabled={!contestId.trim()}
                 className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-lg flex justify-center items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isContestSaved ? <><CheckCircle className="w-4 h-4" /> Live</> : 'Push Contest'}
+                {isContestSaved ? <React.Fragment><CheckCircle className="w-4 h-4" /> Live</React.Fragment> : 'Push Contest'}
               </button>           
             </form>
           </div>
@@ -237,6 +318,7 @@ function AdminEventsComponent() {
                       onChange={(e) => setCurrentUserEmail(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
+                          e.preventDefault();
                           handleAddMemberToDraft(e);
                         }
                       }}
@@ -253,9 +335,9 @@ function AdminEventsComponent() {
                 </div>
 
                 <div className={`space-y-1.5 max-h-36 overflow-y-auto pr-2 ${scrollbar}`}>
-                  {currentGroupMembers.map((member, idx) => (
+                  {currentGroupMembers.map((email, idx) => (
                     <div key={idx} className="flex justify-between bg-slate-800 rounded px-2 py-1 text-xs">
-                      <span className="truncate text-slate-300 font-mono">{member}</span>
+                      <span className="truncate text-slate-300 font-mono">{email}</span>
                       <button type="button" onClick={() => setCurrentGroupMembers(currentGroupMembers.filter((_, i) => i !== idx))} className="text-rose-400 hover:text-rose-300">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -306,9 +388,9 @@ function AdminEventsComponent() {
                 </div>
 
                 <div className={`space-y-1 max-h-40 overflow-y-auto pr-2 ${scrollbar}`}>
-                  {group.members.map((member, idx) => (
+                  {group.members.map((m, idx) => (
                     <div key={idx} className="text-xs bg-slate-900 rounded px-2 py-1.5 font-mono text-slate-300 truncate">
-                      {member}
+                      {m.email}
                     </div>
                   ))}
                 </div>

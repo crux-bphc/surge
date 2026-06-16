@@ -21,287 +21,82 @@ export const Route = createFileRoute("/events/$slug")({
   },
 });
 
-const eventContests: Record<
-  string,
-  { id: string; name: string; date: string }[]
-> = {
-  socc: [
-    { id: "1", name: "Summer of CC - Contest 1", date: "May 31" },
-    { id: "2", name: "Summer of CC - Contest 2", date: "June 7" },
-  ],
-};
-
 const COLORS = ["bg-green-500", "bg-blue-500", "bg-pink-500", "bg-purple-500"];
 
-type UserRatingChange = {
-  contestId: number;
-  rank: number;
-  oldRating: number;
-  newRating: number;
-};
-
-const mockData: Record<string, any[]> = {
-  "1": [
-    {
-      id: "u1",
-      name: "Aaryan Mehta",
-      cfHandle: "nebulaboy",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 2000,
-      score: 500,
-      groupName: "A",
-    },
-    {
-      id: "u2",
-      name: "Aaryan Mehta2",
-      cfHandle: "nebulaboy2",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 2000,
-      score: 500,
-      groupName: "B",
-    },
-    {
-      id: "u3",
-      name: "Aaryan Mehta3",
-      cfHandle: "nebulaboy3",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 2000,
-      score: 500,
-      groupName: "C",
-    },
-    {
-      id: "u4",
-      name: "Aaryan Mehta4",
-      cfHandle: "nebulaboy4",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 2000,
-      score: 500,
-      groupName: "D",
-    },
-    {
-      id: "u5",
-      name: "Proteus",
-      cfHandle: "Proteus26",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 50,
-      score: 200,
-      groupName: "A",
-    },
-  ],
-  "2": [
-    {
-      id: "u1",
-      name: "Aaryan Mehta",
-      cfHandle: "nebulaboy",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 2000,
-      score: 500,
-      groupName: "A",
-    },
-    {
-      id: "u2",
-      name: "Aaryan Mehta2",
-      cfHandle: "nebulaboy2",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 2000,
-      score: 500,
-      groupName: "B",
-    },
-    {
-      id: "u3",
-      name: "Aaryan Mehta3",
-      cfHandle: "nebulaboy3",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 2000,
-      score: 500,
-      groupName: "C",
-    },
-    {
-      id: "u4",
-      name: "Aaryan Mehta4",
-      cfHandle: "nebulaboy4",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 2000,
-      score: 500,
-      groupName: "D",
-    },
-    {
-      id: "u5",
-      name: "Proteus",
-      cfHandle: "Proteus26",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 50,
-      score: 200,
-      groupName: "A",
-    },
-    {
-      id: "u6",
-      name: "Proteus1",
-      cfHandle: "Proteus261",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 50,
-      score: 200,
-      groupName: "A",
-    },
-    {
-      id: "u7",
-      name: "Proteus2",
-      cfHandle: "Proteus262",
-      pfpUrl: "",
-      batch: "2024",
-      cfRating: 50,
-      score: 200,
-      groupName: "A",
-    },
-  ],
-};
+interface EventDetail {
+  id: number;
+  name: string;
+  desc: string;
+  contests: {
+    id: number;
+    name: string;
+    startTime: string;
+    durationMinutes: number;
+  }[];
+}
 
 function RouteComponent() {
-  const { slug } = useParams({ from: "/events/$slug" });
-  const { user, loading } = useAuth();
-  const [userRatings, setUserRatings] = useState<
-    Record<string, UserRatingChange>
-  >({});
-  const [loadingRatings, setLoadingRatings] = useState(false);
-  const [eventLeaderboard, setEventLeaderboard] = useState<Leaderboard[]>([]);
+  const { slug: eventId } = useParams({ from: "/events/$slug" });
+  const { user, loading: authLoading } = useAuth();
+  const { view, batch, group } = Route.useSearch();
+
+  const [event, setEvent] = useState<EventDetail | null>(null);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
 
-  const { view } = Route.useSearch();
+  useEffect(() => {
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`)
+      .then((res) => {setEvent(res.data);})
+      .catch((err) => {console.error("Error fetching event details:", err);})
+      .finally(() => {setLoading(false);});
+  }, [eventId]);
 
   useEffect(() => {
-    if (user?.cfHandle) {
-      setLoadingRatings(true);
-      axios
-        .get(
-          `${import.meta.env.VITE_API_BASE_URL}/account/${user.cfHandle}/ratings`,
-          {
-            withCredentials: true,
-          }
-        )
-        .then((res) => {
-          const ratingsMap: Record<string, UserRatingChange> = {};
-          res.data.forEach((r: UserRatingChange) => {
-            ratingsMap[r.contestId.toString()] = r;
-          });
-          setUserRatings(ratingsMap);
-        })
-        .finally(() => setLoadingRatings(false));
-    }
-  }, [user?.cfHandle]);
+    setLoadingLeaderboard(true);
+    let type = "global";
+    if (view === "Group Wise") type = "group-vs-group";
+    if (view === "My Group") type = "intra-group";
 
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      setLoadingLeaderboard(true);
-      try {
-        const contests = eventContests[slug] || [];
-
-        const responses = await Promise.all(
-          contests.map((c) =>
-            axios
-              .get(`${import.meta.env.VITE_API_BASE_URL}/leaderboard/${c.id}`)
-              .catch((err) => {
-                console.warn(
-                  `Failed to fetch leaderboard for contest ${c.id}`,
-                  err
-                );
-                return { data: [] };
-              })
-          )
-        );
-
-        let contestResults = responses.map((res) => res.data);
-
-        if (slug === "socc" && contestResults.every((r) => r.length === 0)) {
-          contestResults = contests.map((c) => mockData[c.id] || []);
-        }
-
-        const aggregation: Record<string, Leaderboard> = {};
-
-        contestResults.forEach((data) => {
-          (data as Leaderboard[]).forEach((entry) => {
-            if (!aggregation[entry.cfHandle]) {
-              aggregation[entry.cfHandle] = {
-                ...entry,
-                score: 0,
-              };
-            }
-            const s = entry.score || entry.points || 0;
-            aggregation[entry.cfHandle].score =
-              (aggregation[entry.cfHandle].score || 0) + s;
-          });
-        });
-
-        const sortedLeaderboard = Object.values(aggregation).sort(
-          (a, b) => (b.score || 0) - (a.score || 0)
-        );
-        setEventLeaderboard(sortedLeaderboard);
-      } catch (err) {
-        console.error("Error processing event leaderboard:", err);
-      } finally {
-        setLoadingLeaderboard(false);
-      }
-    };
-
-    fetchLeaderboard();
-  }, [slug]);
-
-  const currentUserGroup = useMemo(() => {
-    if (!user || !eventLeaderboard.length) return null;
-    const userEntry = eventLeaderboard.find(
-      (e) => e.id === user.id || e.cfHandle === user.cfHandle
-    );
-    return userEntry?.groupName || null;
-  }, [user, eventLeaderboard]);
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/leaderboard?type=${type}`, {
+        withCredentials: true
+      })
+      .then((res) => {setLeaderboard(res.data);})
+      .catch((err) => {console.error("Error fetching event leaderboard:", err);})
+      .finally(() => {setLoadingLeaderboard(false);});
+  }, [eventId, view]);
 
   const filteredLeaderboard = useMemo(() => {
-    if (view === "My Group") {
-      return eventLeaderboard.filter(
-        (entry) => entry.groupName === currentUserGroup
-      );
-    }
-    return eventLeaderboard;
-  }, [view, eventLeaderboard, currentUserGroup]);
+    if (view === "Group Wise") return leaderboard; 
+    return leaderboard
+      .filter((entry) => !batch || (entry.email && entry.email.includes(`f${batch}`)))
+      .filter((entry) => !group || entry.groupName === group);
+  }, [leaderboard, batch, group, view]);
 
-  const groupRankings = useMemo(() => {
-    if (view !== "Group Wise") return [];
-    const aggregation: Record<
-      string,
-      { name: string; score: number; count: number }
-    > = {};
-    eventLeaderboard.forEach((entry) => {
-      const g = entry.groupName || "N/A";
-      if (!aggregation[g]) aggregation[g] = { name: g, score: 0, count: 0 };
-      aggregation[g].score += entry.score || 0;
-      aggregation[g].count += 1;
+  const batches = useMemo(() => {
+    if (view === "Group Wise") return [];
+    const b = new Set<string>();
+    leaderboard.forEach((u) => {
+      if (u.email) {
+        const match = u.email.match(/f(\d{4})/);
+        if (match) b.add(match[1]);
+      }
     });
-    return Object.values(aggregation).sort((a, b) => b.score - a.score);
-  }, [view, eventLeaderboard]);
+    return Array.from(b).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [leaderboard, view]);
 
-  const batches = [
-    ...new Set<string>(eventLeaderboard.map((user) => user.batch)),
-  ]
-    .filter((batch) => (batch ? true : false))
-    .sort((a, b) => parseInt(b) - parseInt(a));
+  const groups = useMemo(() => {
+    if (view === "Group Wise") return [];
+    const g = new Set<string>();
+    leaderboard.forEach((u) => {
+      if (u.groupName) g.add(u.groupName);
+    });
+    return Array.from(g).sort();
+  }, [leaderboard, view]);
 
-  const groups = [
-    ...new Set<string>(eventLeaderboard.map((user) => user.groupName || "")),
-  ].filter((g) => g !== "");
-
-  if (loading || loadingRatings) return <LoadingIndicator />;
-
-  const eventName = slug === "socc" ? "Summer of CC" : slug.toUpperCase();
-  const contests = eventContests[slug] || [];
+  if (authLoading || loading) return <LoadingIndicator />;
+  if (!event) return <div className="text-center py-20">Event not found.</div>;
 
   return (
     <div className="max-w-7xl m-auto px-4 md:px-0">
@@ -316,9 +111,10 @@ function RouteComponent() {
               Back to Events
             </Link>
             <h1 className="text-3xl font-bold text-white">
-              {eventName}{" "}
+              {event.name}{" "}
               <span className="text-highlight-lighter">Dashboard</span>
             </h1>
+            <p className="text-muted mt-2">{event.desc}</p>
           </div>
           <ProfileHeader
             cfRating={user?.cfRating || undefined}
@@ -327,7 +123,7 @@ function RouteComponent() {
         </div>
       </div>
 
-      {contests.length > 0 && (
+      {event.contests.length > 0 && (
         <div className="mt-8">
           <LeaderboardHeader
             batches={[]}
@@ -339,15 +135,14 @@ function RouteComponent() {
             hideFilters={true}
             variant="small"
           />
-          <div className="flex flex-wrap gap-6">
-            {contests.map((c, i) => (
+          <div className="flex flex-wrap gap-6 mt-6">
+            {event.contests.map((c, i) => (
               <ContestCard
                 key={c.id}
-                id={c.id}
+                id={c.id.toString()}
                 name={c.name}
-                date={c.date}
+                date={new Date(c.startTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 color={COLORS[i % COLORS.length]}
-                userPerf={userRatings[c.id]}
               />
             ))}
           </div>
@@ -372,32 +167,30 @@ function RouteComponent() {
           </div>
         ) : view === "Group Wise" ? (
           <div className="flex flex-col mt-8">
-            {groupRankings.map((group, index) => (
+            {filteredLeaderboard.map((group, index) => (
               <div
-                key={group.name}
+                key={group.groupId}
                 className="h-16 rounded-xl flex justify-start mb-4 items-center bg-[#25293E] text-white"
               >
                 <div className="w-8 md:w-16 ml-4 md:m-4 text-base flex justify-center items-center">
                   {index + 1}
                 </div>
                 <div className="h-full flex-1 flex items-center text-sm md:text-base font-bold">
-                  {group.name}
+                  {group.groupName}
                 </div>
-                <div className="w-20 md:w-32 text-sm text-center md:text-base flex justify-center items-center font-bold mr-4">
+                <div className="w-20 md:w-32 text-sm text-center md:text-base flex justify-center items-center font-bold mr-4 text-highlight-lighter text-lg">
                   {group.score} pts
                 </div>
               </div>
             ))}
           </div>
-        ) : eventLeaderboard.length > 0 ? (
-          <div className="flex flex-col">
+        ) : filteredLeaderboard.length > 0 ? (
+          <div className="flex flex-col mt-8">
             <div className="h-80 mx-auto flex justify-center items-end mb-15 mt-15">
-              <div
-                className={`flex justify-around items-end h-50 w-150 rounded-xl`}
-              >
+              <div className={`flex justify-around items-end h-50 w-150 rounded-xl`}>
                 {filteredLeaderboard[1] && (
                   <div
-                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-l-xl ${filteredLeaderboard[1].id === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#1B1E30]"}`}
+                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-l-xl ${filteredLeaderboard[1].userId === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#1B1E30]"}`}
                   >
                     <div className="absolute -top-13 w-full flex justify-center items-center">
                       <img
@@ -407,11 +200,9 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="absolute top-1 w-full text-lg flex justify-center items-center">
-                      <span className="bg-[#5FCABB] rounded-full w-7 text-center font-medium">
-                        2
-                      </span>
+                      <span className="bg-[#5FCABB] rounded-full w-7 text-center font-medium text-white">2</span>
                     </div>
-                    <div className="text-sm md:text-md flex text-center justify-center items-start mx-1 md:mx-4 max-h-18 md:max-h-12">
+                    <div className="text-sm md:text-md flex text-center justify-center items-start mx-1 md:mx-4 max-h-18 md:max-h-12 text-white">
                       <Link
                         to="/profile/$slug"
                         params={{ slug: filteredLeaderboard[1].cfHandle }}
@@ -420,21 +211,18 @@ function RouteComponent() {
                         {filteredLeaderboard[1].name}
                       </Link>
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center">
-                      {filteredLeaderboard[1].batch || "N/A"}
+                    <div className="text-xs md:text-sm flex justify-center items-center text-slate-100 font-bold uppercase tracking-wider">
+                      {filteredLeaderboard[1].groupName || "N/A"}
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center font-bold">
-                      {filteredLeaderboard[1].score || 0}
-                    </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center">
-                      {filteredLeaderboard[1].groupName ||
-                        getRatingLevel(filteredLeaderboard[1].cfRating)}
+                    <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66]">
+                      {filteredLeaderboard[1].score || 0} pts
                     </div>
                   </div>
                 )}
+                
                 {filteredLeaderboard[0] && (
                   <div
-                    className={`relative w-full h-65 bg-[#25293E] flex flex-col rounded-t-3xl justify-evenly pt-10  ${filteredLeaderboard[0].id === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#25293E]"}`}
+                    className={`relative w-full h-65 bg-[#25293E] flex flex-col rounded-t-3xl justify-evenly pt-10 ${filteredLeaderboard[0].userId === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#25293E]"}`}
                   >
                     <div className="absolute -top-17 w-full flex justify-center items-center">
                       <img
@@ -444,11 +232,9 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="absolute top-3 text-lg flex justify-center items-center w-full">
-                      <span className="w-7 bg-[#DCBE66] rounded-full text-center font-medium">
-                        1
-                      </span>
+                      <span className="w-7 bg-[#DCBE66] rounded-full text-center font-medium text-white">1</span>
                     </div>
-                    <div className="text-sm md:text-md flex text-center justify-center items-start mx-1 md:mx-4 max-h-18 md:max-h-12">
+                    <div className="text-sm md:text-md flex text-center justify-center items-start mx-1 md:mx-4 max-h-18 md:max-h-12 text-white font-bold text-lg">
                       <Link
                         to="/profile/$slug"
                         params={{ slug: filteredLeaderboard[0].cfHandle }}
@@ -457,24 +243,21 @@ function RouteComponent() {
                         {filteredLeaderboard[0].name}
                       </Link>
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center">
-                      {filteredLeaderboard[0].batch || "N/A"}
+                    <div className="text-xs md:text-sm flex justify-center items-center text-slate-100 font-bold uppercase tracking-wider">
+                      {filteredLeaderboard[0].groupName || "N/A"}
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center font-bold">
-                      {filteredLeaderboard[0].score || 0}
+                    <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66] text-lg">
+                      {filteredLeaderboard[0].score || 0} pts
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center">
-                      {filteredLeaderboard[0].groupName ||
-                        getRatingLevel(filteredLeaderboard[0].cfRating)}
-                    </div>
-                    <div className="text-LG font-bold flex justify-center items-center">
+                    <div className="text-lg font-bold flex justify-center items-center text-yellow-500">
                       WINNER
                     </div>
                   </div>
                 )}
+
                 {filteredLeaderboard[2] && (
                   <div
-                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-r-xl ${filteredLeaderboard[2].id === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#1B1E30]"}`}
+                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-r-xl ${filteredLeaderboard[2].userId === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#1B1E30]"}`}
                   >
                     <div className="absolute -top-13 w-full flex justify-center items-center">
                       <img
@@ -484,11 +267,9 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="absolute top-1 text-lg flex justify-center items-center w-full">
-                      <span className="w-7 bg-[#DD7A6C] rounded-full text-center font-medium">
-                        3
-                      </span>
+                      <span className="w-7 bg-[#DD7A6C] rounded-full text-center font-medium text-white">3</span>
                     </div>
-                    <div className="text-sm md:text-md flex justify-center text-center items-start max-h-18 md:max-h-12 mx-1 md:mx-4">
+                    <div className="text-sm md:text-md flex justify-center text-center items-start max-h-18 md:max-h-12 mx-1 md:mx-4 text-white">
                       <Link
                         to="/profile/$slug"
                         params={{ slug: filteredLeaderboard[2].cfHandle }}
@@ -497,15 +278,11 @@ function RouteComponent() {
                         {filteredLeaderboard[2].name}
                       </Link>
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center">
-                      {filteredLeaderboard[2].batch || "N/A"}
+                    <div className="text-xs md:text-sm flex justify-center items-center text-slate-100 font-bold uppercase tracking-wider">
+                      {filteredLeaderboard[2].groupName || "N/A"}
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center font-bold">
-                      {filteredLeaderboard[2].score || 0}
-                    </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center">
-                      {filteredLeaderboard[2].groupName ||
-                        getRatingLevel(filteredLeaderboard[2].cfRating)}
+                    <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66]">
+                      {filteredLeaderboard[2].score || 0} pts
                     </div>
                   </div>
                 )}
@@ -513,49 +290,42 @@ function RouteComponent() {
             </div>
 
             <div className="flex flex-col mt-8">
-              {filteredLeaderboard.slice(3).map((entry, index) => {
-                const actualRank = index + 4;
-
-                return (
-                  <div
-                    key={entry.cfHandle}
-                    className={`h-16 rounded-xl flex justify-start mb-4 items-center transition-all duration-200 hover:scale-[1.01] ${
-                      entry.id === user?.id
-                        ? "bg-accent-purple text-highlight-darker font-bold"
-                        : "bg-[#25293E] text-white"
-                    }`}
+              {filteredLeaderboard.slice(3).map((entry, index) => (
+                <div
+                  key={entry.cfHandle}
+                  className={`h-16 rounded-xl flex justify-start mb-4 items-center transition-all duration-200 hover:scale-[1.01] ${
+                    entry.userId === user?.id
+                      ? "bg-accent-purple text-highlight-darker font-bold"
+                      : "bg-[#25293E] text-white"
+                  }`}
+                >
+                  <div className="w-8 md:w-16 ml-4 md:m-4 text-base flex justify-center items-center">
+                    {index + 4}
+                  </div>
+                  <div className="hidden h-16 aspect-square mr-6 md:flex justify-center items-center">
+                    <img
+                      src={entry.pfpUrl}
+                      alt="PFP"
+                      className="h-10 w-10 rounded-full object-cover border border-highlight-light/20"
+                    />
+                  </div>
+                  <Link
+                    to="/profile/$slug"
+                    params={{ slug: entry.cfHandle }}
+                    className="h-full flex-1 flex items-center text-sm md:text-base truncate mr-4 hover:underline transition-all duration-200"
                   >
-                    <div className="w-8 md:w-16 ml-4 md:m-4 text-base flex justify-center items-center">
-                      {actualRank}
+                    {entry.name}
+                  </Link>
+                  <div className="flex gap-4 md:gap-8 ml-auto mr-8 items-center font-black">
+                    <div className="hidden md:block text-sm text-white uppercase tracking-tighter">
+                      {entry.groupName || "N/A"}
                     </div>
-                    <div className="hidden h-16 aspect-square mr-6 md:flex justify-center items-center">
-                      <img
-                        src={entry.pfpUrl}
-                        alt="PFP"
-                        className="h-10 w-10 rounded-full object-cover"
-                      />
-                    </div>
-                    <Link
-                      to="/profile/$slug"
-                      params={{ slug: entry.cfHandle }}
-                      className="h-full flex-1 flex items-center text-sm md:text-base truncate mr-4 hover:scale-105 transition-all duration-200"
-                    >
-                      {entry.name}
-                    </Link>
-                    <div className="flex gap-4 md:gap-4 ml-auto mr-4">
-                      <div className="w-8 md:w-16 text-sm text-center md:text-base flex justify-center items-center">
-                        {entry.batch || "N/A"}
-                      </div>
-                      <div className="w-20 md:w-32 text-sm text-center md:text-base flex justify-center items-center font-bold">
-                        {entry.score || 0}
-                      </div>
-                      <div className="hidden md:flex w-32 text-sm text-center md:text-base justify-center items-center pr-2">
-                        {entry.groupName || getRatingLevel(entry.cfRating)}
-                      </div>
+                    <div className="w-24 text-sm text-right md:text-base text-[#DCBE66]">
+                      {entry.score || 0} pts
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           </div>
         ) : (
