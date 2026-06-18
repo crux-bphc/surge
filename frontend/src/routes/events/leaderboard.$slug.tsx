@@ -252,7 +252,7 @@ function RouteComponent() {
                     <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66] text-lg">
                       {filteredLeaderboard[0].score || 0} pts
                     </div>
-                    <div className="text-lg font-bold flex justify-center items-center text-yellow-500">
+                    <div className="text-lg font-bold flex justify-center items-center">
                       WINNER
                     </div>
                   </div>

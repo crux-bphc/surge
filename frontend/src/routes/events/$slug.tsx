@@ -44,10 +44,17 @@ function RouteComponent() {
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`)
-      .then((res) => {setEvent(res.data);})
-      .catch((err) => {console.error("Error fetching event details:", err);})
-      .finally(() => {setLoading(false);});
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`)
+      .then((res) => {
+        setEvent(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching event details:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [eventId]);
 
   useEffect(() => {
@@ -57,18 +64,29 @@ function RouteComponent() {
     if (view === "My Group") type = "intra-group";
 
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/leaderboard?type=${type}`, {
-        withCredentials: true
+      .get(
+        `${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/leaderboard?type=${type}`,
+        {
+          withCredentials: true,
+        }
+      )
+      .then((res) => {
+        setLeaderboard(res.data);
       })
-      .then((res) => {setLeaderboard(res.data);})
-      .catch((err) => {console.error("Error fetching event leaderboard:", err);})
-      .finally(() => {setLoadingLeaderboard(false);});
+      .catch((err) => {
+        console.error("Error fetching event leaderboard:", err);
+      })
+      .finally(() => {
+        setLoadingLeaderboard(false);
+      });
   }, [eventId, view]);
 
   const filteredLeaderboard = useMemo(() => {
-    if (view === "Group Wise") return leaderboard; 
+    if (view === "Group Wise") return leaderboard;
     return leaderboard
-      .filter((entry) => !batch || (entry.email && entry.email.includes(`f${batch}`)))
+      .filter(
+        (entry) => !batch || (entry.email && entry.email.includes(`f${batch}`))
+      )
       .filter((entry) => !group || entry.groupName === group);
   }, [leaderboard, batch, group, view]);
 
@@ -139,7 +157,10 @@ function RouteComponent() {
                 key={c.id}
                 id={c.id.toString()}
                 name={c.name}
-                date={new Date(c.startTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                date={new Date(c.startTime).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}
                 color={COLORS[i % COLORS.length]}
                 isEvent={true}
               />
@@ -186,7 +207,9 @@ function RouteComponent() {
         ) : filteredLeaderboard.length > 0 ? (
           <div className="flex flex-col mt-8">
             <div className="h-80 mx-auto flex justify-center items-end mb-15 mt-15">
-              <div className={`flex justify-around items-end h-50 w-150 rounded-xl`}>
+              <div
+                className={`flex justify-around items-end h-50 w-150 rounded-xl`}
+              >
                 {filteredLeaderboard[1] && (
                   <div
                     className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-l-xl ${filteredLeaderboard[1].userId === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#1B1E30]"}`}
@@ -199,7 +222,9 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="absolute top-1 w-full text-lg flex justify-center items-center">
-                      <span className="bg-[#5FCABB] rounded-full w-7 text-center font-medium text-white">2</span>
+                      <span className="bg-[#5FCABB] rounded-full w-7 text-center font-medium text-white">
+                        2
+                      </span>
                     </div>
                     <div className="text-sm md:text-md flex text-center justify-center items-start mx-1 md:mx-4 max-h-18 md:max-h-12 text-white">
                       <Link
@@ -218,7 +243,7 @@ function RouteComponent() {
                     </div>
                   </div>
                 )}
-                
+
                 {filteredLeaderboard[0] && (
                   <div
                     className={`relative w-full h-65 bg-[#25293E] flex flex-col rounded-t-3xl justify-evenly pt-10 ${filteredLeaderboard[0].userId === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#25293E]"}`}
@@ -231,7 +256,9 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="absolute top-3 text-lg flex justify-center items-center w-full">
-                      <span className="w-7 bg-[#DCBE66] rounded-full text-center font-medium text-white">1</span>
+                      <span className="w-7 bg-[#DCBE66] rounded-full text-center font-medium text-white">
+                        1
+                      </span>
                     </div>
                     <div className="text-sm md:text-md flex text-center justify-center items-start mx-1 md:mx-4 max-h-18 md:max-h-12 text-white font-bold text-lg">
                       <Link
@@ -248,7 +275,7 @@ function RouteComponent() {
                     <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66] text-lg">
                       {filteredLeaderboard[0].score || 0} pts
                     </div>
-                    <div className="text-lg font-bold flex justify-center items-center text-yellow-500">
+                    <div className="text-lg font-bold flex justify-center items-center">
                       WINNER
                     </div>
                   </div>
@@ -266,7 +293,9 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="absolute top-1 text-lg flex justify-center items-center w-full">
-                      <span className="w-7 bg-[#DD7A6C] rounded-full text-center font-medium text-white">3</span>
+                      <span className="w-7 bg-[#DD7A6C] rounded-full text-center font-medium text-white">
+                        3
+                      </span>
                     </div>
                     <div className="text-sm md:text-md flex justify-center text-center items-start max-h-18 md:max-h-12 mx-1 md:mx-4 text-white">
                       <Link
