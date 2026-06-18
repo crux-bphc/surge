@@ -22,6 +22,7 @@ import { Route as ResourceSlugRouteImport } from './routes/resource/$slug'
 import { Route as ProfileSlugRouteImport } from './routes/profile/$slug'
 import { Route as LeaderboardSlugRouteImport } from './routes/leaderboard/$slug'
 import { Route as EventsSlugRouteImport } from './routes/events/$slug'
+import { Route as EventsLeaderboardSlugRouteImport } from './routes/events/leaderboard.$slug'
 
 const WrappedRoute = WrappedRouteImport.update({
   id: '/wrapped',
@@ -88,6 +89,11 @@ const EventsSlugRoute = EventsSlugRouteImport.update({
   path: '/events/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsLeaderboardSlugRoute = EventsLeaderboardSlugRouteImport.update({
+  id: '/events/leaderboard/$slug',
+  path: '/events/leaderboard/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/resource': typeof ResourceIndexRoute
+  '/events/leaderboard/$slug': typeof EventsLeaderboardSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/resource': typeof ResourceIndexRoute
+  '/events/leaderboard/$slug': typeof EventsLeaderboardSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/leaderboard/': typeof LeaderboardIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/resource/': typeof ResourceIndexRoute
+  '/events/leaderboard/$slug': typeof EventsLeaderboardSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/profile'
     | '/resource'
+    | '/events/leaderboard/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/profile'
     | '/resource'
+    | '/events/leaderboard/$slug'
   id:
     | '__root__'
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/leaderboard/'
     | '/profile/'
     | '/resource/'
+    | '/events/leaderboard/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   LeaderboardIndexRoute: typeof LeaderboardIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   ResourceIndexRoute: typeof ResourceIndexRoute
+  EventsLeaderboardSlugRoute: typeof EventsLeaderboardSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/leaderboard/$slug': {
+      id: '/events/leaderboard/$slug'
+      path: '/events/leaderboard/$slug'
+      fullPath: '/events/leaderboard/$slug'
+      preLoaderRoute: typeof EventsLeaderboardSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -309,6 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardIndexRoute: LeaderboardIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   ResourceIndexRoute: ResourceIndexRoute,
+  EventsLeaderboardSlugRoute: EventsLeaderboardSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

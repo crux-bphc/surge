@@ -27,6 +27,7 @@ export default function EventCard({
         <Link
           to="/events/$slug"
           params={{ slug }}
+          search={{ batch: undefined, group: undefined, view: undefined }}
           className="inline-flex items-center gap-2 px-4 py-3 rounded-lg bg-accent-purple hover:bg-accent-purple/80 text-white transition-transform duration-200 hover:scale-105 text-md font-medium"
         >
           {buttonLabel}

@@ -4,11 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import ProfileHeader from "../../components/ProfileHeader";
 import { useAuth } from "../../context/AuthContext";
 import LoadingIndicator from "../../components/LoadingIndicator";
-import ContestCard from "../../components/ContestCard";
 import { ArrowLeft, Trophy } from "lucide-react";
 import LeaderboardHeader from "../../components/LeaderboardHeader";
 
-export const Route = createFileRoute("/events/$slug")({
+export const Route = createFileRoute("/events/leaderboard/$slug")({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>) => {
     return {
@@ -19,36 +18,37 @@ export const Route = createFileRoute("/events/$slug")({
   },
 });
 
-const COLORS = ["bg-green-500", "bg-blue-500", "bg-pink-500", "bg-purple-500"];
-
-interface EventDetail {
+interface ContestDetail {
   id: number;
+  eventId: number;
   name: string;
-  desc: string;
-  contests: {
-    id: number;
-    name: string;
-    startTime: string;
-    durationMinutes: number;
-  }[];
+  startTime: string;
+  durationMinutes: number;
 }
 
 function RouteComponent() {
-  const { slug: eventId } = useParams({ from: "/events/$slug" });
+  const { slug: contestId } = useParams({ from: "/events/leaderboard/$slug" });
   const { user, loading: authLoading } = useAuth();
   const { view, batch, group } = Route.useSearch();
 
-  const [event, setEvent] = useState<EventDetail | null>(null);
+  const [contest, setContest] = useState<ContestDetail | null>(null);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`)
-      .then((res) => {setEvent(res.data);})
-      .catch((err) => {console.error("Error fetching event details:", err);})
-      .finally(() => {setLoading(false);});
-  }, [eventId]);
+    axios
+      .get(`${import.meta.env.VITE_API_BASE_URL}/event/contest/${contestId}`)
+      .then((res) => {
+        setContest(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching contest details:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [contestId]);
 
   useEffect(() => {
     setLoadingLeaderboard(true);
@@ -57,18 +57,29 @@ function RouteComponent() {
     if (view === "My Group") type = "intra-group";
 
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/leaderboard?type=${type}`, {
-        withCredentials: true
+      .get(
+        `${import.meta.env.VITE_API_BASE_URL}/event/contest/${contestId}/leaderboard?type=${type}`,
+        {
+          withCredentials: true,
+        }
+      )
+      .then((res) => {
+        setLeaderboard(res.data);
       })
-      .then((res) => {setLeaderboard(res.data);})
-      .catch((err) => {console.error("Error fetching event leaderboard:", err);})
-      .finally(() => {setLoadingLeaderboard(false);});
-  }, [eventId, view]);
+      .catch((err) => {
+        console.error("Error fetching contest leaderboard:", err);
+      })
+      .finally(() => {
+        setLoadingLeaderboard(false);
+      });
+  }, [contestId, view]);
 
   const filteredLeaderboard = useMemo(() => {
-    if (view === "Group Wise") return leaderboard; 
+    if (view === "Group Wise") return leaderboard;
     return leaderboard
-      .filter((entry) => !batch || (entry.email && entry.email.includes(`f${batch}`)))
+      .filter(
+        (entry) => !batch || (entry.email && entry.email.includes(`f${batch}`))
+      )
       .filter((entry) => !group || entry.groupName === group);
   }, [leaderboard, batch, group, view]);
 
@@ -94,7 +105,8 @@ function RouteComponent() {
   }, [leaderboard, view]);
 
   if (authLoading || loading) return <LoadingIndicator />;
-  if (!event) return <div className="text-center py-20">Event not found.</div>;
+  if (!contest)
+    return <div className="text-center py-20">Contest not found.</div>;
 
   return (
     <div className="max-w-7xl m-auto px-4 md:px-0">
@@ -102,17 +114,22 @@ function RouteComponent() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <Link
-              to="/events"
+              to="/events/$slug"
+              params={{ slug: contest.eventId.toString() }}
+              search={{ batch: undefined, group: undefined, view: undefined }}
               className="flex items-center gap-1 text-muted hover:text-white transition-colors mb-4 text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Events
+              Back to Event Dashboard
             </Link>
             <h1 className="text-3xl font-bold text-white">
-              {event.name}{" "}
-              <span className="text-highlight-lighter">Dashboard</span>
+              {contest.name}{" "}
+              <span className="text-highlight-lighter">Leaderboard</span>
             </h1>
-            <p className="text-muted mt-2">{event.desc}</p>
+            <p className="text-muted mt-2">
+              Contest Date: {new Date(contest.startTime).toLocaleDateString()} |
+              Duration: {contest.durationMinutes} mins
+            </p>
           </div>
           <ProfileHeader
             cfRating={user?.cfRating || undefined}
@@ -121,41 +138,14 @@ function RouteComponent() {
         </div>
       </div>
 
-      {event.contests.length > 0 && (
-        <div className="mt-8">
-          <LeaderboardHeader
-            batches={[]}
-            leaderboard={[]}
-            path="/events/$slug"
-            title="Event"
-            titleHighlight="contests"
-            hideSearch={true}
-            hideFilters={true}
-            variant="small"
-          />
-          <div className="flex flex-wrap gap-6 mt-6">
-            {event.contests.map((c, i) => (
-              <ContestCard
-                key={c.id}
-                id={c.id.toString()}
-                name={c.name}
-                date={new Date(c.startTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                color={COLORS[i % COLORS.length]}
-                isEvent={true}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="mt-16 mb-20">
+      <div className="mt-8 mb-20">
         <LeaderboardHeader
           batches={batches}
           groups={groups}
           leaderboard={filteredLeaderboard}
-          path="/events/$slug"
-          title="Events"
-          titleHighlight="Leaderboard"
+          path="/events/leaderboard/$slug"
+          title="Contest"
+          titleHighlight="Standings"
           hideSearch={true}
           variant="small"
         />
@@ -166,19 +156,19 @@ function RouteComponent() {
           </div>
         ) : view === "Group Wise" ? (
           <div className="flex flex-col mt-8">
-            {filteredLeaderboard.map((group, index) => (
+            {filteredLeaderboard.map((groupEntry, index) => (
               <div
-                key={group.groupId}
+                key={groupEntry.groupId}
                 className="h-16 rounded-xl flex justify-start mb-4 items-center bg-[#25293E] text-white"
               >
                 <div className="w-8 md:w-16 ml-4 md:m-4 text-base flex justify-center items-center">
                   {index + 1}
                 </div>
                 <div className="h-full flex-1 flex items-center text-sm md:text-base font-bold">
-                  {group.groupName}
+                  {groupEntry.groupName}
                 </div>
                 <div className="w-20 md:w-32 text-sm text-center md:text-base flex justify-center items-center font-bold mr-4 text-highlight-lighter text-lg">
-                  {group.score} pts
+                  {groupEntry.score} pts
                 </div>
               </div>
             ))}
@@ -186,10 +176,16 @@ function RouteComponent() {
         ) : filteredLeaderboard.length > 0 ? (
           <div className="flex flex-col mt-8">
             <div className="h-80 mx-auto flex justify-center items-end mb-15 mt-15">
-              <div className={`flex justify-around items-end h-50 w-150 rounded-xl`}>
+              <div
+                className={`flex justify-around items-end h-50 w-150 rounded-xl`}
+              >
                 {filteredLeaderboard[1] && (
                   <div
-                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-l-xl ${filteredLeaderboard[1].userId === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#1B1E30]"}`}
+                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-l-xl ${
+                      filteredLeaderboard[1].userId === user?.id
+                        ? "bg-accent-purple text-highlight-darker font-bold"
+                        : "bg-[#1B1E30]"
+                    }`}
                   >
                     <div className="absolute -top-13 w-full flex justify-center items-center">
                       <img
@@ -199,7 +195,9 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="absolute top-1 w-full text-lg flex justify-center items-center">
-                      <span className="bg-[#5FCABB] rounded-full w-7 text-center font-medium text-white">2</span>
+                      <span className="bg-[#5FCABB] rounded-full w-7 text-center font-medium text-white">
+                        2
+                      </span>
                     </div>
                     <div className="text-sm md:text-md flex text-center justify-center items-start mx-1 md:mx-4 max-h-18 md:max-h-12 text-white">
                       <Link
@@ -218,10 +216,14 @@ function RouteComponent() {
                     </div>
                   </div>
                 )}
-                
+
                 {filteredLeaderboard[0] && (
                   <div
-                    className={`relative w-full h-65 bg-[#25293E] flex flex-col rounded-t-3xl justify-evenly pt-10 ${filteredLeaderboard[0].userId === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#25293E]"}`}
+                    className={`relative w-full h-65 bg-[#25293E] flex flex-col rounded-t-3xl justify-evenly pt-10 ${
+                      filteredLeaderboard[0].userId === user?.id
+                        ? "bg-accent-purple text-highlight-darker font-bold"
+                        : "bg-[#25293E]"
+                    }`}
                   >
                     <div className="absolute -top-17 w-full flex justify-center items-center">
                       <img
@@ -231,7 +233,9 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="absolute top-3 text-lg flex justify-center items-center w-full">
-                      <span className="w-7 bg-[#DCBE66] rounded-full text-center font-medium text-white">1</span>
+                      <span className="w-7 bg-[#DCBE66] rounded-full text-center font-medium text-white">
+                        1
+                      </span>
                     </div>
                     <div className="text-sm md:text-md flex text-center justify-center items-start mx-1 md:mx-4 max-h-18 md:max-h-12 text-white font-bold text-lg">
                       <Link
@@ -256,7 +260,11 @@ function RouteComponent() {
 
                 {filteredLeaderboard[2] && (
                   <div
-                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-r-xl ${filteredLeaderboard[2].userId === user?.id ? "bg-accent-purple text-highlight-darker" : "bg-[#1B1E30]"}`}
+                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-r-xl ${
+                      filteredLeaderboard[2].userId === user?.id
+                        ? "bg-accent-purple text-highlight-darker font-bold"
+                        : "bg-[#1B1E30]"
+                    }`}
                   >
                     <div className="absolute -top-13 w-full flex justify-center items-center">
                       <img
@@ -266,7 +274,9 @@ function RouteComponent() {
                       />
                     </div>
                     <div className="absolute top-1 text-lg flex justify-center items-center w-full">
-                      <span className="w-7 bg-[#DD7A6C] rounded-full text-center font-medium text-white">3</span>
+                      <span className="w-7 bg-[#DD7A6C] rounded-full text-center font-medium text-white">
+                        3
+                      </span>
                     </div>
                     <div className="text-sm md:text-md flex justify-center text-center items-start max-h-18 md:max-h-12 mx-1 md:mx-4 text-white">
                       <Link
@@ -331,7 +341,7 @@ function RouteComponent() {
           <div className="text-center py-20 bg-[#25293E] rounded-2xl border-2 border-dashed border-highlight-light/10">
             <Trophy className="w-12 h-12 text-muted mx-auto mb-4 opacity-20" />
             <p className="text-muted text-lg">
-              No participants have joined this event yet.
+              No participants have joined this contest yet.
             </p>
           </div>
         )}
