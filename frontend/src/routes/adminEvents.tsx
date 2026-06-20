@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import axios from 'axios';
 import { 
-  Plus, Trash2, Pencil, X, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw, House
+  Trash2, Pencil, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw, House
 } from 'lucide-react';
 
 const emailRegex = /^f\d{8}@hyderabad\.bits-pilani\.ac\.in$/;
