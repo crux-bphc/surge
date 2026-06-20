@@ -12,8 +12,6 @@ export const Route = createFileRoute("/events/$slug/")({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>) => {
     return {
-      batch: typeof search.batch === "string" ? search.batch : undefined,
-      group: typeof search.group === "string" ? search.group : undefined,
       view: typeof search.view === "string" ? search.view : undefined,
     };
   },
@@ -36,7 +34,7 @@ interface EventDetail {
 function RouteComponent() {
   const { slug: eventId } = useParams({ from: "/events/$slug" });
   const { user, loading: authLoading } = useAuth();
-  const { view, batch, group } = Route.useSearch();
+  const { view } = Route.useSearch();
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -89,35 +87,7 @@ function RouteComponent() {
       });
   }, [eventId, view]);
 
-  const filteredLeaderboard = useMemo(() => {
-    if (view === "Group Wise") return leaderboard;
-    return leaderboard
-      .filter(
-        (entry) => !batch || (entry.email && entry.email.includes(`f${batch}`))
-      )
-      .filter((entry) => !group || entry.groupName === group);
-  }, [leaderboard, batch, group, view]);
-
-  const batches = useMemo(() => {
-    if (view === "Group Wise") return [];
-    const b = new Set<string>();
-    leaderboard.forEach((u) => {
-      if (u.email) {
-        const match = u.email.match(/f(\d{4})/);
-        if (match) b.add(match[1]);
-      }
-    });
-    return Array.from(b).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [leaderboard, view]);
-
-  const groups = useMemo(() => {
-    if (view === "Group Wise") return [];
-    const g = new Set<string>();
-    leaderboard.forEach((u) => {
-      if (u.groupName) g.add(u.groupName);
-    });
-    return Array.from(g).sort();
-  }, [leaderboard, view]);
+  const filteredLeaderboard = leaderboard;
 
   if (authLoading || loading) return <LoadingIndicator />;
   if (!event) return <div className="text-center py-20">Event not found.</div>;
@@ -150,7 +120,6 @@ function RouteComponent() {
       {event.contests.length > 0 && (
         <div className="mt-8">
           <LeaderboardHeader
-            batches={[]}
             leaderboard={[]}
             path="/events/$slug"
             title="Event"
@@ -179,8 +148,6 @@ function RouteComponent() {
 
       <div className="mt-16 mb-20">
         <LeaderboardHeader
-          batches={batches}
-          groups={groups}
           leaderboard={filteredLeaderboard}
           path="/events/$slug"
           title="Events"
