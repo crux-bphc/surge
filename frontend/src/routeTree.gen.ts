@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WrappedRouteImport } from './routes/wrapped'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as PotdRouteImport } from './routes/potd'
-import { Route as AdminEventsRouteImport } from './routes/adminEvents'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResourceIndexRouteImport } from './routes/resource/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile/index'
@@ -22,7 +21,9 @@ import { Route as ResourceSlugRouteImport } from './routes/resource/$slug'
 import { Route as ProfileSlugRouteImport } from './routes/profile/$slug'
 import { Route as LeaderboardSlugRouteImport } from './routes/leaderboard/$slug'
 import { Route as EventsSlugRouteImport } from './routes/events/$slug'
+import { Route as EventsSlugIndexRouteImport } from './routes/events/$slug/index'
 import { Route as EventsLeaderboardSlugRouteImport } from './routes/events/leaderboard.$slug'
+import { Route as EventsSlugAdminRouteImport } from './routes/events/$slug/admin'
 
 const WrappedRoute = WrappedRouteImport.update({
   id: '/wrapped',
@@ -37,11 +38,6 @@ const StatsRoute = StatsRouteImport.update({
 const PotdRoute = PotdRouteImport.update({
   id: '/potd',
   path: '/potd',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminEventsRoute = AdminEventsRouteImport.update({
-  id: '/adminEvents',
-  path: '/adminEvents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -89,19 +85,28 @@ const EventsSlugRoute = EventsSlugRouteImport.update({
   path: '/events/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsSlugIndexRoute = EventsSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EventsSlugRoute,
+} as any)
 const EventsLeaderboardSlugRoute = EventsLeaderboardSlugRouteImport.update({
   id: '/events/leaderboard/$slug',
   path: '/events/leaderboard/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsSlugAdminRoute = EventsSlugAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => EventsSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/adminEvents': typeof AdminEventsRoute
   '/potd': typeof PotdRoute
   '/stats': typeof StatsRoute
   '/wrapped': typeof WrappedRoute
-  '/events/$slug': typeof EventsSlugRoute
+  '/events/$slug': typeof EventsSlugRouteWithChildren
   '/leaderboard/$slug': typeof LeaderboardSlugRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/resource/$slug': typeof ResourceSlugRoute
@@ -109,15 +114,15 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/resource': typeof ResourceIndexRoute
+  '/events/$slug/admin': typeof EventsSlugAdminRoute
   '/events/leaderboard/$slug': typeof EventsLeaderboardSlugRoute
+  '/events/$slug/': typeof EventsSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/adminEvents': typeof AdminEventsRoute
   '/potd': typeof PotdRoute
   '/stats': typeof StatsRoute
   '/wrapped': typeof WrappedRoute
-  '/events/$slug': typeof EventsSlugRoute
   '/leaderboard/$slug': typeof LeaderboardSlugRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/resource/$slug': typeof ResourceSlugRoute
@@ -125,16 +130,17 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/resource': typeof ResourceIndexRoute
+  '/events/$slug/admin': typeof EventsSlugAdminRoute
   '/events/leaderboard/$slug': typeof EventsLeaderboardSlugRoute
+  '/events/$slug': typeof EventsSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/adminEvents': typeof AdminEventsRoute
   '/potd': typeof PotdRoute
   '/stats': typeof StatsRoute
   '/wrapped': typeof WrappedRoute
-  '/events/$slug': typeof EventsSlugRoute
+  '/events/$slug': typeof EventsSlugRouteWithChildren
   '/leaderboard/$slug': typeof LeaderboardSlugRoute
   '/profile/$slug': typeof ProfileSlugRoute
   '/resource/$slug': typeof ResourceSlugRoute
@@ -142,13 +148,14 @@ export interface FileRoutesById {
   '/leaderboard/': typeof LeaderboardIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/resource/': typeof ResourceIndexRoute
+  '/events/$slug/admin': typeof EventsSlugAdminRoute
   '/events/leaderboard/$slug': typeof EventsLeaderboardSlugRoute
+  '/events/$slug/': typeof EventsSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/adminEvents'
     | '/potd'
     | '/stats'
     | '/wrapped'
@@ -160,15 +167,15 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/profile'
     | '/resource'
+    | '/events/$slug/admin'
     | '/events/leaderboard/$slug'
+    | '/events/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/adminEvents'
     | '/potd'
     | '/stats'
     | '/wrapped'
-    | '/events/$slug'
     | '/leaderboard/$slug'
     | '/profile/$slug'
     | '/resource/$slug'
@@ -176,11 +183,12 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/profile'
     | '/resource'
+    | '/events/$slug/admin'
     | '/events/leaderboard/$slug'
+    | '/events/$slug'
   id:
     | '__root__'
     | '/'
-    | '/adminEvents'
     | '/potd'
     | '/stats'
     | '/wrapped'
@@ -192,16 +200,17 @@ export interface FileRouteTypes {
     | '/leaderboard/'
     | '/profile/'
     | '/resource/'
+    | '/events/$slug/admin'
     | '/events/leaderboard/$slug'
+    | '/events/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminEventsRoute: typeof AdminEventsRoute
   PotdRoute: typeof PotdRoute
   StatsRoute: typeof StatsRoute
   WrappedRoute: typeof WrappedRoute
-  EventsSlugRoute: typeof EventsSlugRoute
+  EventsSlugRoute: typeof EventsSlugRouteWithChildren
   LeaderboardSlugRoute: typeof LeaderboardSlugRoute
   ProfileSlugRoute: typeof ProfileSlugRoute
   ResourceSlugRoute: typeof ResourceSlugRoute
@@ -233,13 +242,6 @@ declare module '@tanstack/react-router' {
       path: '/potd'
       fullPath: '/potd'
       preLoaderRoute: typeof PotdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/adminEvents': {
-      id: '/adminEvents'
-      path: '/adminEvents'
-      fullPath: '/adminEvents'
-      preLoaderRoute: typeof AdminEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -305,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$slug/': {
+      id: '/events/$slug/'
+      path: '/'
+      fullPath: '/events/$slug/'
+      preLoaderRoute: typeof EventsSlugIndexRouteImport
+      parentRoute: typeof EventsSlugRoute
+    }
     '/events/leaderboard/$slug': {
       id: '/events/leaderboard/$slug'
       path: '/events/leaderboard/$slug'
@@ -312,16 +321,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsLeaderboardSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$slug/admin': {
+      id: '/events/$slug/admin'
+      path: '/admin'
+      fullPath: '/events/$slug/admin'
+      preLoaderRoute: typeof EventsSlugAdminRouteImport
+      parentRoute: typeof EventsSlugRoute
+    }
   }
 }
 
+interface EventsSlugRouteChildren {
+  EventsSlugAdminRoute: typeof EventsSlugAdminRoute
+  EventsSlugIndexRoute: typeof EventsSlugIndexRoute
+}
+
+const EventsSlugRouteChildren: EventsSlugRouteChildren = {
+  EventsSlugAdminRoute: EventsSlugAdminRoute,
+  EventsSlugIndexRoute: EventsSlugIndexRoute,
+}
+
+const EventsSlugRouteWithChildren = EventsSlugRoute._addFileChildren(
+  EventsSlugRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminEventsRoute: AdminEventsRoute,
   PotdRoute: PotdRoute,
   StatsRoute: StatsRoute,
   WrappedRoute: WrappedRoute,
-  EventsSlugRoute: EventsSlugRoute,
+  EventsSlugRoute: EventsSlugRouteWithChildren,
   LeaderboardSlugRoute: LeaderboardSlugRoute,
   ProfileSlugRoute: ProfileSlugRoute,
   ResourceSlugRoute: ResourceSlugRoute,

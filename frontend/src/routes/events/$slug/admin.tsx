@@ -4,6 +4,7 @@ import axios from 'axios';
 import { 
   Trash2, Pencil, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw, House
 } from 'lucide-react';
+import { useParams } from '@tanstack/react-router'
 
 const emailRegex = /^f\d{8}@hyderabad\.bits-pilani\.ac\.in$/;
 interface GroupMember {
@@ -26,7 +27,7 @@ interface PastContest {
 
 const scrollbar = "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full";
 
-export const Route = createFileRoute('/adminEvents')({
+export const Route = createFileRoute('/events/$slug/admin')({
   component: AdminEventsComponent,
 });
 
@@ -50,7 +51,10 @@ function AdminEventsComponent() {
   // this needs to be changed a bit 
   // and also some event dashboard thing for admin to get the admin thing for an event probably
   // im not doing allat
-  const eventId = 1;
+  // this is fixed ish now
+  const { slug } = useParams({ from: '/events/$slug/admin' });
+  const eventId = parseInt(slug);
+  // const eventId = 1;
   const fetchData = useCallback(async () => {
     try {
       const eventRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`);
