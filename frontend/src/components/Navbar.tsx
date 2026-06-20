@@ -44,6 +44,18 @@ export default function Navbar() {
             </span>
           </Link>
           <Link
+            to="/events"
+            className="group transition-all duration-200 hover:scale-110"
+            activeProps={{
+              className:
+                "group transition-all duration-200 hover:scale-110 active",
+            }}
+          >
+            <span className="material-symbols-outlined text-highlight-light group-hover:text-white transition-colors duration-200 [.active_&]:text-white [.active_&]:drop-shadow-lg">
+              event
+            </span>
+          </Link>
+          <Link
             to="/potd"
             className="group transition-all duration-200 hover:scale-110"
             activeProps={{
@@ -152,6 +164,22 @@ export default function Navbar() {
               </span>
               <p className="[.active_&]:text-white [.active_&]:drop-shadow-lg">
                 Leaderboard
+              </p>
+            </Link>
+            <Link
+              to="/events"
+              className="group transition-all duration-200 hover:scale-110 flex gap-4 text-xl text-highlight-light items-center w-52"
+              activeProps={{
+                className:
+                  "group transition-all duration-200 hover:scale-110 active",
+              }}
+              onClick={toggleMobileMenu}
+            >
+              <span className="!text-3xl material-symbols-outlined text-highlight-light group-hover:text-white transition-colors duration-200 [.active_&]:text-white [.active_&]:drop-shadow-lg">
+                event
+              </span>
+              <p className="[.active_&]:text-white [.active_&]:drop-shadow-lg">
+                Events
               </p>
             </Link>
             <Link

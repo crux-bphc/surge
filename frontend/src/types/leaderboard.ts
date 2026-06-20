@@ -7,4 +7,7 @@ export type Leaderboard = {
   pfpUrl: string;
   batch: string;
   rank?: number;
+  groupName?: string;
+  score?: number;
+  points?: number;
 };

@@ -11,6 +11,7 @@ import {
   updateUserRatings,
 } from "../utils/dbHelpers";
 import { linkCfHandle } from "../codeforces_api";
+import { syncEventLeaderboard } from "../utils/eventHelpers";
 
 //Keep track of problem key to problem id relations in local map
 //Problem key is contestId-problemIndex, like 2323-B, 122-C, etc.
@@ -54,6 +55,10 @@ async function init() {
         url = `https://codeforces.com/api/problemset.problems`;
       } else if (type === "contest.list") {
         url = `https://codeforces.com/api/contest.list?gym=${gym ? "true" : "false"}`;
+      } else if (type === "event.sync") {
+        const { contestId } = job.data;
+        await syncEventLeaderboard(contestId);
+        return;
       } else {
         throw new Error(`Unsupported job type: ${type}`);
       }
