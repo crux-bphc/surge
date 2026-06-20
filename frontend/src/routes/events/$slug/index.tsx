@@ -42,6 +42,7 @@ function RouteComponent() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     axios
@@ -59,6 +60,7 @@ function RouteComponent() {
 
   useEffect(() => {
     setLoadingLeaderboard(true);
+    setError(null);
     let type = "global";
     if (view === "Group Wise") type = "group-vs-group";
     if (view === "My Group") type = "intra-group";
@@ -75,6 +77,12 @@ function RouteComponent() {
       })
       .catch((err) => {
         console.error("Error fetching event leaderboard:", err);
+        if (err.response && err.response.status === 404) {
+          setError("no-group");
+          setLeaderboard([]);
+        } else {
+          setError("failed");
+        }
       })
       .finally(() => {
         setLoadingLeaderboard(false);
@@ -184,6 +192,11 @@ function RouteComponent() {
         {loadingLeaderboard ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-highlight-lighter"></div>
+          </div>
+        ) : error === "no-group" ? (
+          <div className="text-center py-20 bg-[#25293E] rounded-2xl border-2 border-dashed border-highlight-light/10 mt-8">
+            <Trophy className="w-12 h-12 text-muted mx-auto mb-4 opacity-20" />
+            <p className="text-muted text-lg">You are not in any group.</p>
           </div>
         ) : view === "Group Wise" ? (
           <div className="flex flex-col mt-8">
