@@ -357,7 +357,7 @@ function RouteComponent() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-20 bg-[#25293E] rounded-2xl border-2 border-dashed border-highlight-light/10">
+          <div className="text-center py-20 bg-[#25293E] rounded-2xl border-2 border-dashed border-highlight-light/10 mt-8">
             <Trophy className="w-12 h-12 text-muted mx-auto mb-4 opacity-20" />
             <p className="text-muted text-lg">
               No participants have joined this event yet.
