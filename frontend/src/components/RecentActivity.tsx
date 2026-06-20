@@ -46,7 +46,7 @@ export default function RecentActivity({ handle }: { handle: string }) {
               key={a.contestId}
               to="/leaderboard/$slug"
               params={{ slug: a.contestId.toString() }}
-              search={{ batch: undefined, level: undefined }}
+              search={{ batch: undefined, level: undefined, group: undefined }}
               className="min-w-[280px] rounded-lg flex shadow-md overflow-hidden hover:scale-[1.015] transition-transform duration-150"
             >
               <div className={`${color} text-white p-4 w-1/3`}>

@@ -11,6 +11,7 @@ import profileRoutes from "./routes/profile";
 import contestRoutes from "./routes/contest";
 import potdRoutes from "./routes/potd";
 import wrappedRoutes from "./routes/wrapped";
+import eventRoutes from "./routes/event";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
 import { client, db } from "./drizzle/db";
@@ -143,6 +144,7 @@ app.use("/profile", profileRoutes);
 app.use("/contest", contestRoutes);
 app.use("/potd", potdRoutes);
 app.use("/wrapped", wrappedRoutes);
+app.use("/event", eventRoutes);
 const PORT = parseInt(process.env.BACKEND_PORT || "5000", 10);
 app.listen(PORT, "0.0.0.0", async () => {
   console.log(`Server running on port ${PORT}`);
