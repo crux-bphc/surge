@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import ProfileHeader from "../../../components/ProfileHeader";
 import { useAuth } from "../../../context/AuthContext";
 import LoadingIndicator from "../../../components/LoadingIndicator";
