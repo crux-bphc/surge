@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import axios from 'axios';
 import { 
-  Trash2, Pencil, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw, House
+  Trash2, Pencil, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw 
 } from 'lucide-react';
 import { useParams } from '@tanstack/react-router'
 
@@ -34,7 +34,6 @@ export const Route = createFileRoute('/events/$slug/admin')({
 function AdminEventsComponent() {
   const [contestId, setContestId] = useState('');
   const [isContestSaved, setIsContestSaved] = useState(false);
-  const [isGlobalSaving, setIsGlobalSaving] = useState(false);
 
   const [groups, setGroups] = useState<Group[]>([]);
   const [pastContests, setPastContests] = useState<PastContest[]>([]);
@@ -107,11 +106,6 @@ function AdminEventsComponent() {
     }
   };
 
-  const handleGlobalSavePortal = () => {
-    setIsGlobalSaving(true);
-    setTimeout(() => setIsGlobalSaving(false), 2000);
-  };
-
 const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
   e.preventDefault();
   
@@ -132,8 +126,8 @@ const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
 
   if (validEmails.length > 0) {
     setCurrentGroupMembers([...currentGroupMembers, ...validEmails]);
-    setCurrentUserEmail('');
   }
+  setCurrentUserEmail('');
 };
   
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -233,12 +227,6 @@ const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
           </h1>
           <p className="text-slate-400 mt-1">Manage weekly contests and organize groups.</p>
         </div>
-        <button
-          onClick={handleGlobalSavePortal}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-5 rounded-lg flex items-center gap-2 transition-colors"
-        >
-          {isGlobalSaving ? <><CheckCircle className="w-4 h-4" /> Saved</> : <><House className="w-4 h-4" /> Events Dashboard</>}
-        </button>
       </div>
 
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
