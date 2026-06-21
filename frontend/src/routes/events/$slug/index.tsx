@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import ProfileHeader from "../../../components/ProfileHeader";
 import { useAuth } from "../../../context/AuthContext";
 import LoadingIndicator from "../../../components/LoadingIndicator";
@@ -12,8 +12,6 @@ export const Route = createFileRoute("/events/$slug/")({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>) => {
     return {
-      batch: typeof search.batch === "string" ? search.batch : undefined,
-      group: typeof search.group === "string" ? search.group : undefined,
       view: typeof search.view === "string" ? search.view : undefined,
     };
   },
@@ -36,12 +34,13 @@ interface EventDetail {
 function RouteComponent() {
   const { slug: eventId } = useParams({ from: "/events/$slug" });
   const { user, loading: authLoading } = useAuth();
-  const { view, batch, group } = Route.useSearch();
+  const { view } = Route.useSearch();
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     axios
@@ -59,6 +58,7 @@ function RouteComponent() {
 
   useEffect(() => {
     setLoadingLeaderboard(true);
+    setError(null);
     let type = "global";
     if (view === "Group Wise") type = "group-vs-group";
     if (view === "My Group") type = "intra-group";
@@ -75,41 +75,19 @@ function RouteComponent() {
       })
       .catch((err) => {
         console.error("Error fetching event leaderboard:", err);
+        if (err.response && err.response.status === 404) {
+          setError("no-group");
+          setLeaderboard([]);
+        } else {
+          setError("failed");
+        }
       })
       .finally(() => {
         setLoadingLeaderboard(false);
       });
   }, [eventId, view]);
 
-  const filteredLeaderboard = useMemo(() => {
-    if (view === "Group Wise") return leaderboard;
-    return leaderboard
-      .filter(
-        (entry) => !batch || (entry.email && entry.email.includes(`f${batch}`))
-      )
-      .filter((entry) => !group || entry.groupName === group);
-  }, [leaderboard, batch, group, view]);
-
-  const batches = useMemo(() => {
-    if (view === "Group Wise") return [];
-    const b = new Set<string>();
-    leaderboard.forEach((u) => {
-      if (u.email) {
-        const match = u.email.match(/f(\d{4})/);
-        if (match) b.add(match[1]);
-      }
-    });
-    return Array.from(b).sort((a, b) => parseInt(b) - parseInt(a));
-  }, [leaderboard, view]);
-
-  const groups = useMemo(() => {
-    if (view === "Group Wise") return [];
-    const g = new Set<string>();
-    leaderboard.forEach((u) => {
-      if (u.groupName) g.add(u.groupName);
-    });
-    return Array.from(g).sort();
-  }, [leaderboard, view]);
+  const filteredLeaderboard = leaderboard;
 
   if (authLoading || loading) return <LoadingIndicator />;
   if (!event) return <div className="text-center py-20">Event not found.</div>;
@@ -142,7 +120,6 @@ function RouteComponent() {
       {event.contests.length > 0 && (
         <div className="mt-8">
           <LeaderboardHeader
-            batches={[]}
             leaderboard={[]}
             path="/events/$slug"
             title="Event"
@@ -171,8 +148,6 @@ function RouteComponent() {
 
       <div className="mt-16 mb-20">
         <LeaderboardHeader
-          batches={batches}
-          groups={groups}
           leaderboard={filteredLeaderboard}
           path="/events/$slug"
           title="Events"
@@ -184,6 +159,11 @@ function RouteComponent() {
         {loadingLeaderboard ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-highlight-lighter"></div>
+          </div>
+        ) : error === "no-group" ? (
+          <div className="text-center py-20 bg-[#25293E] rounded-2xl border-2 border-dashed border-highlight-light/10 mt-8">
+            <Trophy className="w-12 h-12 text-muted mx-auto mb-4 opacity-20" />
+            <p className="text-muted text-lg">You are not in any group.</p>
           </div>
         ) : view === "Group Wise" ? (
           <div className="flex flex-col mt-8">
@@ -357,7 +337,7 @@ function RouteComponent() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-20 bg-[#25293E] rounded-2xl border-2 border-dashed border-highlight-light/10">
+          <div className="text-center py-20 bg-[#25293E] rounded-2xl border-2 border-dashed border-highlight-light/10 mt-8">
             <Trophy className="w-12 h-12 text-muted mx-auto mb-4 opacity-20" />
             <p className="text-muted text-lg">
               No participants have joined this event yet.
