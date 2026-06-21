@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import axios from 'axios';
 import { 
-  Trash2, Pencil, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw, House
+  Trash2, Pencil, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw 
 } from 'lucide-react';
 import { useParams } from '@tanstack/react-router'
 
@@ -34,7 +34,6 @@ export const Route = createFileRoute('/events/$slug/admin')({
 function AdminEventsComponent() {
   const [contestId, setContestId] = useState('');
   const [isContestSaved, setIsContestSaved] = useState(false);
-  const [isGlobalSaving, setIsGlobalSaving] = useState(false);
 
   const [groups, setGroups] = useState<Group[]>([]);
   const [pastContests, setPastContests] = useState<PastContest[]>([]);
@@ -107,21 +106,30 @@ function AdminEventsComponent() {
     }
   };
 
-  const handleGlobalSavePortal = () => {
-    setIsGlobalSaving(true);
-    setTimeout(() => setIsGlobalSaving(false), 2000);
-  };
+const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
+  e.preventDefault();
+  
+  const inputString = currentUserEmail.trim();
+  if (!inputString) return;
 
-  const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    const email = currentUserEmail.trim();
+  // Split by commas or any whitespaces (\s)
+  const allEmails= inputString
+    .split(/[,\s]+/)
+    .map(email => email.trim());
 
-    if (email && emailRegex.test(email) && !currentGroupMembers.includes(email)) {
-      setCurrentGroupMembers([...currentGroupMembers, email]);
-      setCurrentUserEmail('');
-    }
-  };
+  const incomingEmails = [...new Set(allEmails)];
 
+  // Filter out invalid or duplicate emails
+  const validEmails= incomingEmails.filter(email => 
+    emailRegex.test(email) && !currentGroupMembers.includes(email)
+  );
+
+  if (validEmails.length > 0) {
+    setCurrentGroupMembers([...currentGroupMembers, ...validEmails]);
+  }
+  setCurrentUserEmail('');
+};
+  
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGroupName.trim()) return;
@@ -219,12 +227,6 @@ function AdminEventsComponent() {
           </h1>
           <p className="text-slate-400 mt-1">Manage weekly contests and organize groups.</p>
         </div>
-        <button
-          onClick={handleGlobalSavePortal}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-5 rounded-lg flex items-center gap-2 transition-colors"
-        >
-          {isGlobalSaving ? <><CheckCircle className="w-4 h-4" /> Saved</> : <><House className="w-4 h-4" /> Events Dashboard</>}
-        </button>
       </div>
 
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
@@ -337,7 +339,18 @@ function AdminEventsComponent() {
                     <UserPlus className="w-4 h-4" />
                   </button>
                 </div>
-
+                {currentGroupMembers.length > 0 && (
+                  <div className="flex justify-between items-center text-xs text-slate-400 px-1 border-b border-slate-800 pb-1.5">
+                    <span>Members ({currentGroupMembers.length})</span>
+                    <button 
+                      type="button"
+                      onClick={() => setCurrentGroupMembers([])}
+                      className="text-rose-400 hover:text-rose-300 transition-colors font-medium"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                )}
                 <div className={`space-y-1.5 max-h-36 overflow-y-auto pr-2 ${scrollbar}`}>
                   {currentGroupMembers.map((email, idx) => (
                     <div key={idx} className="flex justify-between bg-slate-800 rounded px-2 py-1 text-xs">
