@@ -15,7 +15,7 @@ const LEVEL_OPTIONS = [
 ];
 
 type LeaderboardHeaderProps = {
-  batches: string[];
+  batches?: string[];
   groups?: string[];
   leaderboard: Leaderboard[];
   path: "/leaderboard/" | "/leaderboard/$slug" | "/events/$slug" | "/events/" | "/events/leaderboard/$slug";
@@ -28,7 +28,7 @@ type LeaderboardHeaderProps = {
 };
 
 export default function LeaderboardHeader({
-  batches,
+  batches = [],
   groups,
   leaderboard,
   path,

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import axios from 'axios';
 import { 
-  Trash2, Pencil, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw, House
+  Trash2, Pencil, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw 
 } from 'lucide-react';
+import { useParams } from '@tanstack/react-router'
 
 const emailRegex = /^f\d{8}@hyderabad\.bits-pilani\.ac\.in$/;
 interface GroupMember {
@@ -26,14 +27,13 @@ interface PastContest {
 
 const scrollbar = "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full";
 
-export const Route = createFileRoute('/adminEvents')({
+export const Route = createFileRoute('/events/$slug/admin')({
   component: AdminEventsComponent,
 });
 
 function AdminEventsComponent() {
   const [contestId, setContestId] = useState('');
   const [isContestSaved, setIsContestSaved] = useState(false);
-  const [isGlobalSaving, setIsGlobalSaving] = useState(false);
 
   const [groups, setGroups] = useState<Group[]>([]);
   const [pastContests, setPastContests] = useState<PastContest[]>([]);
@@ -50,7 +50,10 @@ function AdminEventsComponent() {
   // this needs to be changed a bit 
   // and also some event dashboard thing for admin to get the admin thing for an event probably
   // im not doing allat
-  const eventId = 1;
+  // this is fixed ish now
+  const { slug } = useParams({ from: '/events/$slug/admin' });
+  const eventId = parseInt(slug);
+  // const eventId = 1;
   const fetchData = useCallback(async () => {
     try {
       const eventRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`);
@@ -103,21 +106,30 @@ function AdminEventsComponent() {
     }
   };
 
-  const handleGlobalSavePortal = () => {
-    setIsGlobalSaving(true);
-    setTimeout(() => setIsGlobalSaving(false), 2000);
-  };
+const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
+  e.preventDefault();
+  
+  const inputString = currentUserEmail.trim();
+  if (!inputString) return;
 
-  const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    const email = currentUserEmail.trim();
+  // Split by commas or any whitespaces (\s)
+  const allEmails= inputString
+    .split(/[,\s]+/)
+    .map(email => email.trim());
 
-    if (email && emailRegex.test(email) && !currentGroupMembers.includes(email)) {
-      setCurrentGroupMembers([...currentGroupMembers, email]);
-      setCurrentUserEmail('');
-    }
-  };
+  const incomingEmails = [...new Set(allEmails)];
 
+  // Filter out invalid or duplicate emails
+  const validEmails= incomingEmails.filter(email => 
+    emailRegex.test(email) && !currentGroupMembers.includes(email)
+  );
+
+  if (validEmails.length > 0) {
+    setCurrentGroupMembers([...currentGroupMembers, ...validEmails]);
+  }
+  setCurrentUserEmail('');
+};
+  
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGroupName.trim()) return;
@@ -215,12 +227,6 @@ function AdminEventsComponent() {
           </h1>
           <p className="text-slate-400 mt-1">Manage weekly contests and organize groups.</p>
         </div>
-        <button
-          onClick={handleGlobalSavePortal}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-5 rounded-lg flex items-center gap-2 transition-colors"
-        >
-          {isGlobalSaving ? <><CheckCircle className="w-4 h-4" /> Saved</> : <><House className="w-4 h-4" /> Events Dashboard</>}
-        </button>
       </div>
 
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
@@ -333,7 +339,18 @@ function AdminEventsComponent() {
                     <UserPlus className="w-4 h-4" />
                   </button>
                 </div>
-
+                {currentGroupMembers.length > 0 && (
+                  <div className="flex justify-between items-center text-xs text-slate-400 px-1 border-b border-slate-800 pb-1.5">
+                    <span>Members ({currentGroupMembers.length})</span>
+                    <button 
+                      type="button"
+                      onClick={() => setCurrentGroupMembers([])}
+                      className="text-rose-400 hover:text-rose-300 transition-colors font-medium"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                )}
                 <div className={`space-y-1.5 max-h-36 overflow-y-auto pr-2 ${scrollbar}`}>
                   {currentGroupMembers.map((email, idx) => (
                     <div key={idx} className="flex justify-between bg-slate-800 rounded px-2 py-1 text-xs">

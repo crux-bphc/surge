@@ -28,7 +28,7 @@ export default function ContestCard({
       <Link
         to="/events/leaderboard/$slug"
         params={{ slug: id }}
-        search={{ view: "Global", batch: undefined, group: undefined }}
+        search={{ view: "Global" }}
         className="w-full md:w-[350px] rounded-lg flex shadow-md overflow-hidden hover:scale-[1.015] transition-transform duration-150"
       >
         <div
