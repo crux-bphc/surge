@@ -339,7 +339,18 @@ const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
                     <UserPlus className="w-4 h-4" />
                   </button>
                 </div>
-
+                {currentGroupMembers.length > 0 && (
+                  <div className="flex justify-between items-center text-xs text-slate-400 px-1 border-b border-slate-800 pb-1.5">
+                    <span>Members ({currentGroupMembers.length})</span>
+                    <button 
+                      type="button"
+                      onClick={() => setCurrentGroupMembers([])}
+                      className="text-rose-400 hover:text-rose-300 transition-colors font-medium"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                )}
                 <div className={`space-y-1.5 max-h-36 overflow-y-auto pr-2 ${scrollbar}`}>
                   {currentGroupMembers.map((email, idx) => (
                     <div key={idx} className="flex justify-between bg-slate-800 rounded px-2 py-1 text-xs">
