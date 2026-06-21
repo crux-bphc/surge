@@ -112,16 +112,30 @@ function AdminEventsComponent() {
     setTimeout(() => setIsGlobalSaving(false), 2000);
   };
 
-  const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    const email = currentUserEmail.trim();
+const handleAddMemberToDraft = (e: React.SyntheticEvent) => {
+  e.preventDefault();
+  
+  const inputString = currentUserEmail.trim();
+  if (!inputString) return;
 
-    if (email && emailRegex.test(email) && !currentGroupMembers.includes(email)) {
-      setCurrentGroupMembers([...currentGroupMembers, email]);
-      setCurrentUserEmail('');
-    }
-  };
+  // Split by commas or any whitespaces (\s)
+  const allEmails= inputString
+    .split(/[,\s]+/)
+    .map(email => email.trim());
 
+  const incomingEmails = [...new Set(allEmails)];
+
+  // Filter out invalid or duplicate emails
+  const validEmails= incomingEmails.filter(email => 
+    emailRegex.test(email) && !currentGroupMembers.includes(email)
+  );
+
+  if (validEmails.length > 0) {
+    setCurrentGroupMembers([...currentGroupMembers, ...validEmails]);
+    setCurrentUserEmail('');
+  }
+};
+  
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGroupName.trim()) return;
