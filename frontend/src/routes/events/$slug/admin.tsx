@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useParams, Navigate } from '@tanstack/react-router';
 import axios from 'axios';
 import { 
   Trash2, Pencil, Users, UserPlus, Trophy, Mail, CheckCircle, History, RefreshCw 
 } from 'lucide-react';
-import { useParams } from '@tanstack/react-router'
 
-const emailRegex = /^f\d{8}@hyderabad\.bits-pilani\.ac\.in$/;
+import { useAuth } from "../../../context/AuthContext.tsx";
+
 interface GroupMember {
   email: string;
   participantId: number;
@@ -25,6 +25,7 @@ interface PastContest {
   duration: string;
 }
 
+const emailRegex = /^f\d{8}@hyderabad\.bits-pilani\.ac\.in$/;
 const scrollbar = "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full";
 
 export const Route = createFileRoute('/events/$slug/admin')({
@@ -32,6 +33,21 @@ export const Route = createFileRoute('/events/$slug/admin')({
 });
 
 function AdminEventsComponent() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-slate-300">
+        Loading admin dashboard...
+      </div>
+    );
+  }
+
+  // Kick out non crux guys
+  if (!user || !user.isCruxMember) {
+    return <Navigate to="/events" replace />; 
+  }
+
   const [contestId, setContestId] = useState('');
   const [isContestSaved, setIsContestSaved] = useState(false);
 

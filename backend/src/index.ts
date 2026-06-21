@@ -18,7 +18,7 @@ import { client, db } from "./drizzle/db";
 import { users } from "./drizzle/schema";
 import { eq } from "drizzle-orm";
 import { startCronJobs } from "./cron";
-import {cruxMembers} from "./middlewares/auth.ts"
+import {cruxMembers} from "./middlewares/auth"
 import {
   fetchContests,
   fetchProblems,
@@ -118,10 +118,14 @@ passport.deserializeUser(async (userId: string, done) => {
       .then((rows) => rows[0]);
     
     if (user) {
-      user.isCruxMember = cruxMembers.has(user.id);
+      const userwithisCruxMemberProperty= {
+        ...user,
+        isCruxMember: cruxMembers.has(user.cfHandle ?? ''), 
+      };
+      
+      return done(null, userwithisCruxMemberProperty);
     }
-
-    done(null, user);
+    done(null, null);
   } catch (error) {
     console.error("Error deserializing user:", error);
     done(new Error("Could not deserialize user"), null);
