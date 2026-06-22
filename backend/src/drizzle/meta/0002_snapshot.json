@@ -1,5 +1,5 @@
 {
-  "id": "aa1e8a8d-7508-414e-ad75-e9329e2d6f2e",
+  "id": "172bd506-499c-40cd-bb45-f307f9582d77",
   "prevId": "335e119b-5faa-46ca-8651-5f40253d9945",
   "version": "7",
   "dialect": "postgresql",
@@ -394,7 +394,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "event_participants_user_id_users_id_fk": {

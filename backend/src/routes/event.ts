@@ -40,7 +40,7 @@ router.get("/:id", async (req, res) => {
       res.status(404).json({ message: "not found" });
       return;
     }
-    const contests = await db.select().from(eventContests).where(eq(eventContests.eventId, id));
+    const contests = await db.select().from(eventContests).where(eq(eventContests.eventId, id)).orderBy(desc(eventContests.startTime));;
     res.status(200).json({ ...event, contests });
   } catch (err) {
     console.error(`error: ${err}`);

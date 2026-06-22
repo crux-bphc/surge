@@ -13,13 +13,14 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-const cruxMembers = new Set<string>([
+export const cruxMembers = new Set<string>([
   "cwswastik",
   "Rittin_Sehgal",
   "manjot1151",
   "aten2005",
   "Yash_Kejriwal",
   "Ellufino",
+  "chicubed",
 ]);
 
 export const requireCruxMember: RequestHandler = async (

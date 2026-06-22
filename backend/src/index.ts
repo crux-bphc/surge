@@ -10,7 +10,7 @@ import leaderboardRoutes from "./routes/leaderboard";
 import profileRoutes from "./routes/profile";
 import contestRoutes from "./routes/contest";
 import potdRoutes from "./routes/potd";
-import wrappedRoutes from "./routes/wrapped";
+// import wrappedRoutes from "./routes/wrapped";
 import eventRoutes from "./routes/event";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
@@ -18,6 +18,7 @@ import { client, db } from "./drizzle/db";
 import { users } from "./drizzle/schema";
 import { eq } from "drizzle-orm";
 import { startCronJobs } from "./cron";
+import {cruxMembers} from "./middlewares/auth"
 import {
   fetchContests,
   fetchProblems,
@@ -115,11 +116,21 @@ passport.deserializeUser(async (userId: string, done) => {
       .where(eq(users.id, userId))
       .limit(1)
       .then((rows) => rows[0]);
-    done(null, user);
+    
+    if (user) {
+      const userwithisCruxMemberProperty= {
+        ...user,
+        isCruxMember: cruxMembers.has(user.cfHandle ?? ''), 
+      };
+      
+      return done(null, userwithisCruxMemberProperty);
+    }
+    done(null, null);
   } catch (error) {
     console.error("Error deserializing user:", error);
     done(new Error("Could not deserialize user"), null);
   }
+
 });
 
 const limiter = rateLimit({
@@ -143,7 +154,7 @@ app.use("/leaderboard", leaderboardRoutes);
 app.use("/profile", profileRoutes);
 app.use("/contest", contestRoutes);
 app.use("/potd", potdRoutes);
-app.use("/wrapped", wrappedRoutes);
+// app.use("/wrapped", wrappedRoutes);
 app.use("/event", eventRoutes);
 const PORT = parseInt(process.env.BACKEND_PORT || "5000", 10);
 app.listen(PORT, "0.0.0.0", async () => {
