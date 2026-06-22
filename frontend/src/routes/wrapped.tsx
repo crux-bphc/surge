@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import StoryViewer from "../components/Wrapped/StoryViewer";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
@@ -62,6 +62,11 @@ const fetchWrappedData = async (id: string) => {
 };
 
 export const Route = createFileRoute("/wrapped")({
+    beforeLoad: () => {
+        throw redirect({
+            to: "/",
+        });
+    },
     component: RouteComponent,
     staticData: { fullScreen: true },
 });
