@@ -201,7 +201,7 @@ export const eventParticipants = pgTable(
   "event_participants",
   {
     id: serial("id").primaryKey(),
-    groupId: integer("group_id").references(() => eventGroups.id, {onDelete: "set null",}),
+    groupId: integer("group_id").references(() => eventGroups.id, {onDelete: "cascade",}),
     userId: text("user_id").notNull().references(() => users.id),
     eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
     participantScore: integer("participant_score").notNull().default(0),

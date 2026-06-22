@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  isCruxMember?: boolean;
   pfpUrl: string;
   cfHandle: string | null;
   cfRating: number | null;
