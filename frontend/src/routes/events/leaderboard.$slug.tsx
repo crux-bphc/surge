@@ -156,23 +156,23 @@ function RouteComponent() {
           </div>
         ) : filteredLeaderboard.length > 0 ? (
           <div className="flex flex-col mt-8">
-            <div className="h-80 mx-auto flex justify-center items-end mb-15 mt-15">
+            <div className="h-80 w-full max-w-lg mx-auto flex justify-center items-end mb-15 mt-15 px-2 md:max-w-none">
               <div
-                className={`flex justify-around items-end h-50 w-150 rounded-xl`}
+                className={`flex justify-around items-end w-full rounded-xl h-50 md:w-150`}
               >
                 {filteredLeaderboard[1] && (
                   <div
-                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-l-xl ${
+                    className={`relative w-full h-44 md:h-50 flex flex-col justify-evenly pt-8 rounded-l-xl ${
                       filteredLeaderboard[1].userId === user?.id
                         ? "bg-accent-purple text-highlight-darker font-bold"
                         : "bg-[#1B1E30]"
                     }`}
                   >
-                    <div className="absolute -top-13 w-full flex justify-center items-center">
+                    <div className="absolute -top-10 md:-top-13 w-full flex justify-center items-center">
                       <img
                         src={filteredLeaderboard[1].pfpUrl}
                         alt="PFP"
-                        className="h-18 w-18 border-[#5FCABB] border-4 rounded-full object-cover"
+                        className="h-16 w-16 md:h-18 md:w-18 border-[#5FCABB] border-4 rounded-full object-cover"
                       />
                     </div>
                     <div className="absolute top-1 w-full text-lg flex justify-center items-center">
@@ -189,7 +189,7 @@ function RouteComponent() {
                         {filteredLeaderboard[1].name}
                       </Link>
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center text-slate-100 font-bold uppercase tracking-wider">
+                    <div className="text-xs md:text-sm flex justify-center items-center text-center text-slate-100 font-bold uppercase tracking-wider">
                       {filteredLeaderboard[1].groupName || "N/A"}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66]">
@@ -200,17 +200,17 @@ function RouteComponent() {
 
                 {filteredLeaderboard[0] && (
                   <div
-                    className={`relative w-full h-65 bg-[#25293E] flex flex-col rounded-t-3xl justify-evenly pt-10 ${
+                    className={`relative w-full h-56 md:h-65 bg-[#25293E] flex flex-col rounded-t-3xl justify-evenly pt-10 ${
                       filteredLeaderboard[0].userId === user?.id
                         ? "bg-accent-purple text-highlight-darker font-bold"
                         : "bg-[#25293E]"
                     }`}
                   >
-                    <div className="absolute -top-17 w-full flex justify-center items-center">
+                    <div className="absolute -top-14 md:-top-17 w-full flex justify-center items-center">
                       <img
                         src={filteredLeaderboard[0].pfpUrl}
                         alt="PFP"
-                        className="h-24 w-24 border-[#DCBE66] border-4 rounded-full object-cover"
+                        className="h-20 w-20 md:h-24 md:w-24 border-[#DCBE66] border-4 rounded-full object-cover"
                       />
                     </div>
                     <div className="absolute top-3 text-lg flex justify-center items-center w-full">
@@ -227,7 +227,7 @@ function RouteComponent() {
                         {filteredLeaderboard[0].name}
                       </Link>
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center text-slate-100 font-bold uppercase tracking-wider">
+                    <div className="text-xs md:text-sm flex justify-center items-center text-center text-slate-100 font-bold uppercase tracking-wider">
                       {filteredLeaderboard[0].groupName || "N/A"}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66] text-lg">
@@ -241,17 +241,17 @@ function RouteComponent() {
 
                 {filteredLeaderboard[2] && (
                   <div
-                    className={`relative w-full h-50 flex flex-col justify-evenly pt-8 rounded-r-xl ${
+                    className={`relative w-full h-44 md:h-50 flex flex-col justify-evenly pt-8 rounded-r-xl ${
                       filteredLeaderboard[2].userId === user?.id
                         ? "bg-accent-purple text-highlight-darker font-bold"
                         : "bg-[#1B1E30]"
                     }`}
                   >
-                    <div className="absolute -top-13 w-full flex justify-center items-center">
+                    <div className="absolute -top-10 md:-top-13 w-full flex justify-center items-center">
                       <img
                         src={filteredLeaderboard[2].pfpUrl}
                         alt="PFP"
-                        className="h-18 w-18 border-[#DD7A6C] border-4 rounded-full object-cover"
+                        className="h-16 w-16 md:h-18 md:w-18 border-[#DD7A6C] border-4 rounded-full object-cover"
                       />
                     </div>
                     <div className="absolute top-1 text-lg flex justify-center items-center w-full">
@@ -268,7 +268,7 @@ function RouteComponent() {
                         {filteredLeaderboard[2].name}
                       </Link>
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center text-slate-100 font-bold uppercase tracking-wider">
+                    <div className="text-xs md:text-sm flex justify-center items-center text-center text-slate-100 font-bold uppercase tracking-wider">
                       {filteredLeaderboard[2].groupName || "N/A"}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66]">
