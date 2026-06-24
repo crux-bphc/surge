@@ -189,7 +189,7 @@ function RouteComponent() {
                         {filteredLeaderboard[1].name}
                       </Link>
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center text-slate-100 font-bold uppercase tracking-wider">
+                    <div className="text-xs md:text-sm flex justify-center items-center text-center text-slate-100 font-bold uppercase tracking-wider">
                       {filteredLeaderboard[1].groupName || "N/A"}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66]">
@@ -227,7 +227,7 @@ function RouteComponent() {
                         {filteredLeaderboard[0].name}
                       </Link>
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center text-slate-100 font-bold uppercase tracking-wider">
+                    <div className="text-xs md:text-sm flex justify-center items-center text-center text-slate-100 font-bold uppercase tracking-wider">
                       {filteredLeaderboard[0].groupName || "N/A"}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66] text-lg">
@@ -268,7 +268,7 @@ function RouteComponent() {
                         {filteredLeaderboard[2].name}
                       </Link>
                     </div>
-                    <div className="text-xs md:text-sm flex justify-center items-center text-slate-100 font-bold uppercase tracking-wider">
+                    <div className="text-xs md:text-sm flex justify-center items-center text-center text-slate-100 font-bold uppercase tracking-wider">
                       {filteredLeaderboard[2].groupName || "N/A"}
                     </div>
                     <div className="text-xs md:text-sm flex justify-center items-center font-black text-[#DCBE66]">
