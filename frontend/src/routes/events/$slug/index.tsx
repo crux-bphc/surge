@@ -186,7 +186,7 @@ function RouteComponent() {
           </div>
         ) : filteredLeaderboard.length > 0 ? (
           <div className="flex flex-col mt-8">
-            <div className="h-80 w-full max-w-lg mx-auto flex justify-center items-end mb-15 mt-15 px-2 md:max-w-none">
+            <div className="w-full max-w-lg mx-auto flex justify-center items-end mb-4 mt-18 md:mt-34 px-2 md:max-w-none">
               <div
                 className={`flex justify-around items-end w-full rounded-xl h-50 md:w-150`}
               >
@@ -297,7 +297,7 @@ function RouteComponent() {
               </div>
             </div>
 
-            <div className="flex flex-col mt-8">
+            <div className="flex flex-col mt-4">
               {filteredLeaderboard.slice(3).map((entry, index) => (
                 <div
                   key={entry.cfHandle}
