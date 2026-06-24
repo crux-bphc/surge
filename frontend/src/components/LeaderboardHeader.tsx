@@ -113,7 +113,13 @@ export default function LeaderboardHeader({
           {/* Filters Section */}
           {!hideFilters && (
             <div
-              className={`flex w-full justify-between gap-4 md:w-auto z-20 ${hideSearch ? "md:ml-auto" : "md:min-w-[22rem]"}`}
+              className={`flex gap-4 z-20 ${
+                path === "/events/$slug" || path === "/events/leaderboard/$slug"
+                  ? "w-auto ml-auto"
+                  : hideSearch
+                  ? "w-full md:w-auto md:ml-auto"
+                  : "w-full md:w-auto justify-between md:min-w-[22rem]"
+              }`}
             >
               {path === "/events/$slug" || path === "/events/leaderboard/$slug" || path === "/leaderboard/$slug" ? (
                 <Dropdown
