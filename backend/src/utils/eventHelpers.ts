@@ -10,8 +10,9 @@ import { eq, sql, and } from "drizzle-orm";
 import crypto from "crypto";
 
 function getProblemWeight(index: string): number {
-  const firstChar = index.charAt(0).toUpperCase();
-  const weight = firstChar.charCodeAt(0) - 64;
+  // const firstChar = index.charAt(0).toUpperCase();
+  // const weight = firstChar.charCodeAt(0) - 64;
+  const weight = 1;
   return weight > 0 ? weight : 0;
 }
 
